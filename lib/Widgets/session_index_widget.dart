@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:pathfinder_mobile/Widgets/session_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,40 +41,14 @@ class SessionIndexWidgetState extends State {
             return const Text("Error loading session info");
           }
 
+          final start = DateTime(2022, 8, 8, 7);
+          final end = DateTime(2022, 8, 11, 7);
+
           return Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: const Padding(padding: EdgeInsets.all(8), child: Text("Monday")),
-                    onTap: () => setState(() {
-                     filterDate = 8;
-                    }),
-                  ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: const Padding(padding: EdgeInsets.all(8), child: Text("Tuesday")),
-                    onTap: () => setState(() {
-                     filterDate = 9;
-                    }),
-                  ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: const Padding(padding: EdgeInsets.all(8), child: Text("Wednesday")),
-                    onTap: () => setState(() {
-                     filterDate = 10;
-                    }),
-                  ),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    child: const Padding(padding: EdgeInsets.all(8), child: Text("Thursday")),
-                    onTap: () => setState(() {
-                     filterDate = 11;
-                    }),
-                  ),                                    
-                ],
+              ButtonBar(
+                alignment: MainAxisAlignment.spaceAround,
+                children: _dayButtons(start, end).toList(),
               ),
               _SessionIndexList(all, filterDate)
             ],
@@ -82,6 +57,28 @@ class SessionIndexWidgetState extends State {
       )
     );
   }
+
+Iterable<Widget> _dayButtons(DateTime start, DateTime end) sync*{
+
+    var days = end.difference(start).inDays;
+    for(int i = 0; i <= days; i++) {
+      var day = start.add(Duration(days: i));
+      yield TextButton(
+        onPressed: () {
+          setState(() {
+            filterDate = day.day;
+          });
+        },
+        style: TextButton.styleFrom(
+          backgroundColor: filterDate == day.day ? Theme.of(context).backgroundColor : Theme.of(context).highlightColor,
+          padding: const EdgeInsets.all(12),
+        ),
+        child: Column(children: [Text(day.day.toString()), Text(DateFormat('EEEE').format(day))])
+      );
+    }
+
+  }
+  
 }
 
 class _SessionIndexList extends StatelessWidget{
@@ -93,7 +90,8 @@ class _SessionIndexList extends StatelessWidget{
 
   List<Session> _filterList()
   {
-    return _all.where((element) => element.timeSlot!.startTime!.uTC!.day == filterDate).toList();
+    var ret = _all.where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate).toList();
+    return ret;
   }
 
   @override
