@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:intl/intl.dart';
+import 'package:pathfinder_mobile/Widgets/session_filter_bottomsheet.dart';
 import 'package:pathfinder_mobile/Widgets/session_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../Data/filter.dart';
 import '../Data/session.dart';
 
 class SessionIndexWidget extends StatefulWidget {
@@ -16,8 +18,11 @@ class SessionIndexWidget extends StatefulWidget {
 
 class SessionIndexWidgetState extends State {
 
+  var displayFilter = false;
   var filterDate = 8;
   List<Session> all = List.empty();
+  var regFilters = <String>{};
+  var filter = Filter();
 
   Future<List<Session>> readJson() async {
     final String response = await rootBundle.loadString('assets/sessions.json');
@@ -50,11 +55,12 @@ class SessionIndexWidgetState extends State {
                 alignment: MainAxisAlignment.spaceAround,
                 children: _dayButtons(start, end).toList(),
               ),
-              _SessionIndexList(all, filterDate)
+              const Divider(),
+              _SessionIndexList(all, filterDate, filter)
             ],
           );
         },
-      )
+      ),
     );
   }
 
@@ -76,8 +82,59 @@ Iterable<Widget> _dayButtons(DateTime start, DateTime end) sync*{
         child: Column(children: [Text(day.day.toString()), Text(DateFormat('EEEE').format(day))])
       );
     }
-
+    yield IconButton(
+      onPressed: (){
+        setState(() {
+          displayFilter = !displayFilter;
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return StatefulBuilder(builder: (context, setState) {
+                return SessionFilterBottomsheet(all, filter);
+              });
+            },
+          ).whenComplete(() => setState(() {
+            
+          },));
+        });
+      },
+      icon: const Icon(Icons.filter_alt)
+    );
   }
+
+  Widget bottomSheet() {
+    var regs = all.expand((s) => s.registrationLevels()).toSet();
+
+    return ListView(
+      children: [
+        const Text("Registration Level"),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: regs.map(
+            (e) => FilterChip(
+              key: UniqueKey(),
+              label: Text(e),
+              selected: regFilters.contains(e),
+              selectedColor: Colors.blueAccent,
+              onSelected: (value) {
+                setState(() {
+                  if(value) {
+                    regFilters.add(e);
+                  }
+                  else {
+                    regFilters.remove(e);
+                  }
+                });
+              }
+            )
+          ).toList()
+        )
+      ],
+    );
+  }
+
+
   
 }
 
@@ -85,12 +142,16 @@ class _SessionIndexList extends StatelessWidget{
 
   final List<Session> _all;
   final int filterDate;
+  final Filter filter;
 
-  const _SessionIndexList(this._all, this.filterDate);
+  const _SessionIndexList(this._all, this.filterDate, this.filter);
 
   List<Session> _filterList()
   {
-    var ret = _all.where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate).toList();
+    var ret = _all
+      .where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate)
+      .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().contains(f)))
+      .toList();
     return ret;
   }
 
