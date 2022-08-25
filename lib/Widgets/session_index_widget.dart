@@ -55,6 +55,18 @@ class SessionIndexWidgetState extends State {
                 alignment: MainAxisAlignment.spaceAround,
                 children: _dayButtons(start, end).toList(),
               ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  ...filterChip(filter.registrationFilters),
+                  ...filterChip(filter.trackFilters),
+                  ...filterChip(filter.keywordFilters),
+                  ...filterChip(filter.areaFilters),
+
+
+                ],
+              ),
               const Divider(),
               _SessionIndexList(all, filterDate, filter)
             ],
@@ -64,7 +76,23 @@ class SessionIndexWidgetState extends State {
     );
   }
 
-Iterable<Widget> _dayButtons(DateTime start, DateTime end) sync*{
+
+  Iterable<FilterChip> filterChip (Set<String> filters) {
+    return <FilterChip>[
+      ...filters.map(
+        (f) => FilterChip(
+          label: Text(f),
+          selected: true,
+          selectedColor: Colors.blue[100],
+          onSelected: ((value) {
+            setState(() => filters.remove(f));
+          })
+        )
+      )
+    ];
+  }
+
+  Iterable<Widget> _dayButtons(DateTime start, DateTime end) sync*{
 
     var days = end.difference(start).inDays;
     for(int i = 0; i <= days; i++) {
@@ -101,41 +129,6 @@ Iterable<Widget> _dayButtons(DateTime start, DateTime end) sync*{
       icon: const Icon(Icons.filter_alt)
     );
   }
-
-  Widget bottomSheet() {
-    var regs = all.expand((s) => s.registrationLevels()).toSet();
-
-    return ListView(
-      children: [
-        const Text("Registration Level"),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: regs.map(
-            (e) => FilterChip(
-              key: UniqueKey(),
-              label: Text(e),
-              selected: regFilters.contains(e),
-              selectedColor: Colors.blueAccent,
-              onSelected: (value) {
-                setState(() {
-                  if(value) {
-                    regFilters.add(e);
-                  }
-                  else {
-                    regFilters.remove(e);
-                  }
-                });
-              }
-            )
-          ).toList()
-        )
-      ],
-    );
-  }
-
-
-  
 }
 
 class _SessionIndexList extends StatelessWidget{
@@ -151,6 +144,9 @@ class _SessionIndexList extends StatelessWidget{
     var ret = _all
       .where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate)
       .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().contains(f)))
+      .where((element) => filter.trackFilters.isEmpty || filter.trackFilters.any((f) => element.track?.title == f))
+      .where((element) => filter.keywordFilters.isEmpty || filter.keywordFilters.any((f) => element.keywords().contains(f)))
+      .where((element) => filter.areaFilters.isEmpty || filter.areaFilters.any((f) => element.interestAreas().contains(f)))
       .toList();
     return ret;
   }
