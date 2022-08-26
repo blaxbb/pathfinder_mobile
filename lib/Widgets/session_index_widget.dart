@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
 import 'package:pathfinder_mobile/Widgets/session_filter_bottomsheet.dart';
 import 'package:pathfinder_mobile/Widgets/session_widget.dart';
@@ -23,6 +24,7 @@ class SessionIndexWidgetState extends State {
   List<Session> all = List.empty();
   var regFilters = <String>{};
   var filter = Filter();
+  final controller = TextEditingController();
 
   String title() => "Session List";
 
@@ -35,6 +37,7 @@ class SessionIndexWidgetState extends State {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       appBar: AppBar(title: Text(title())),
       body: FutureBuilder<List<Session>>(
@@ -55,6 +58,29 @@ class SessionIndexWidgetState extends State {
             children: [
               Wrap(
                 children: _dayButtons(start, end).toList(),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: controller,
+                  onChanged: (value) => setState(() {
+                    debugPrint(value);
+                    filter.search = value;
+                  }),
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Search",
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() {
+                          controller.clear();
+                          filter.search = "";
+                        });
+                      },
+                    )
+                  ),
+                ),
               ),
               Wrap(
                 spacing: 8,
@@ -146,6 +172,12 @@ class SessionIndexList extends StatelessWidget{
 
   List<Session> _filterList()
   {
+    if(filter.search?.isNotEmpty ?? false)
+    {
+      var fuzz = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.title!,);
+      return fuzz.map((e) => e.choice).toList();
+    }
+
     var ret = _all
       .where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate)
       .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().contains(f)))

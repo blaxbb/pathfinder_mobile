@@ -3,4 +3,6 @@ class Filter {
   var trackFilters = <String>{};
   var keywordFilters = <String>{};
   var areaFilters = <String>{};
+
+  String? search;
 }
