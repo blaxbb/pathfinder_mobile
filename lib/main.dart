@@ -22,7 +22,13 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        brightness: Brightness.light,
       ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: Colors.blue
+      ),
+      themeMode: ThemeMode.system,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routes: {
         "/schedule": (context) => const SizedBox.shrink(),
@@ -70,7 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: BoxDecoration(
                 color: Colors.blue
               ),
-              child: Text("SIGGRAPH Pathfinder"),
+              child: Image(
+                isAntiAlias: true,
+                image: AssetImage("assets/s2022.png")
+              ),
             ),
             ListTile(
               title: const Text("All"),

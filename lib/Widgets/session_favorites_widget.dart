@@ -22,13 +22,13 @@ class SessionFavoriteWidgetState extends SessionIndexWidgetState {
       future: filterFavorited(all),
       builder: (context, snapshot) {
         if(!snapshot.hasData){
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
         if(snapshot.hasData) {
           return SessionIndexList(snapshot.data!, filterDate, filter);
         }
 
-        return SizedBox.shrink();
+        return const SizedBox.shrink();
       }
     );
   }

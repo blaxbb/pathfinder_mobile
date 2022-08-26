@@ -34,7 +34,7 @@ class _SessionWidgetState extends State<SessionWidget> {
               padding: const EdgeInsets.only(right: 8),
               child: Icon(
                 tapped ? Icons.star : Icons.star_border,
-                color: tapped ? Colors.yellow : Colors.black,
+                color: tapped ? Colors.yellow : Theme.of(context).textTheme.bodyMedium!.color,
                 shadows: [
                   Shadow(color: tapped ? Colors.black : Colors.transparent, offset: const Offset(0,0), blurRadius: 2
                   ),

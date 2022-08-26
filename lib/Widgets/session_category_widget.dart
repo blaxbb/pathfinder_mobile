@@ -14,7 +14,8 @@ class SessionCategoryWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all()
+        border: Border.all(),
+        borderRadius: const BorderRadius.all(Radius.circular(8))
       ),
       padding: const EdgeInsets.all(8),
       margin: const EdgeInsets.all(8),

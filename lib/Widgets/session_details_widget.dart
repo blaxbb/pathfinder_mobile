@@ -46,9 +46,7 @@ class SessionDetailsWidgetState extends State {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     keywordWidget(),
-                    const SizedBox(height: 8),
                     interestAreasWidget(),
-                    const SizedBox(height: 8),
                     registrationLevelsWidget(),
                   ]
                 ),
@@ -59,6 +57,9 @@ class SessionDetailsWidgetState extends State {
               child:Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SelectableHtml(
+                  style: {
+                    "div": Style(fontSize: const FontSize(16))
+                  },
                   data: _session.description,
                   onLinkTap: (url, context, attributes, element) => launchUrl(Uri.parse(url ?? "")),
                 ),
@@ -102,14 +103,14 @@ class SessionDetailsWidgetState extends State {
     return Row(children: [
       Expanded(
         child: Column( children: [
-          const Text("Start Time", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(_session.timeSlot!.startTime!.simpleTime())
+          Text("Start Time", style: Theme.of(context).textTheme.titleLarge),
+          Text(_session.timeSlot!.startTime!.simpleTime(), style: Theme.of(context).textTheme.bodyMedium)
         ],)
       ),
       Expanded(
         child: Column( children: [
-          const Text("End Time", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(_session.timeSlot!.endTime!.simpleTime())
+          Text("End Time", style: Theme.of(context).textTheme.titleLarge),
+          Text(_session.timeSlot!.endTime!.simpleTime(), style: Theme.of(context).textTheme.bodyMedium)
         ],),
       )        
     ]);
@@ -119,14 +120,14 @@ class SessionDetailsWidgetState extends State {
     return Row(children: [
       Expanded(
         child: Column( children: [
-          const Text("Location", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(_session.room?.name ?? "")
+          Text("Location", style: Theme.of(context).textTheme.titleLarge),
+          Text(_session.room?.name ?? "", style: Theme.of(context).textTheme.bodyMedium)
         ],)
       ),
       Expanded(
         child: Column( children: [
-          const Text("Format", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(_session.format())
+          Text("Format", style: Theme.of(context).textTheme.titleLarge),
+          Text(_session.format(), style: Theme.of(context).textTheme.bodyMedium)
         ],)
       )
     ]);
@@ -141,12 +142,15 @@ class SessionDetailsWidgetState extends State {
       return const SizedBox.shrink();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-      Text(title, style: const TextStyle(fontWeight: FontWeight.bold),),
-      Text(values.join(" - "))
-    ]);
+    return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge,),
+          Text(values.join(" - "), style: Theme.of(context).textTheme.bodyMedium)
+          ]),
+      );
   }
 
 }
