@@ -37,7 +37,7 @@ class SessionIndexWidgetState extends State {
 
   @override
   Widget build(BuildContext context) {
-    
+
     return Scaffold(
       appBar: AppBar(title: Text(title())),
       body: FutureBuilder<List<Session>>(
@@ -64,7 +64,6 @@ class SessionIndexWidgetState extends State {
                 child: TextField(
                   controller: controller,
                   onChanged: (value) => setState(() {
-                    debugPrint(value);
                     filter.search = value;
                   }),
                   decoration: InputDecoration(
