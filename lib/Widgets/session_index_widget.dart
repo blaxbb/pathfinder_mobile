@@ -53,8 +53,7 @@ class SessionIndexWidgetState extends State {
 
           return Column(
             children: [
-              ButtonBar(
-                alignment: MainAxisAlignment.spaceAround,
+              Wrap(
                 children: _dayButtons(start, end).toList(),
               ),
               Wrap(
