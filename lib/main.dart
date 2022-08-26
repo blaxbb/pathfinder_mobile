@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'Data/session.dart';
+import 'Widgets/session_favorites_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -80,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: const Text("Favorites"),
               onTap: () => Navigator
-              .push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget()))
+              .push(context, MaterialPageRoute(builder: (context) => const SessionFavoritesWidget()))
               .then((value) {Navigator.pop(context); all = readJson();}),
             ),
           ],

@@ -24,6 +24,8 @@ class SessionIndexWidgetState extends State {
   var regFilters = <String>{};
   var filter = Filter();
 
+  String title() => "Session List";
+
   Future<List<Session>> readJson() async {
     final String response = await rootBundle.loadString('assets/sessions.json');
     final Iterable data = await jsonDecode(response);
@@ -34,7 +36,7 @@ class SessionIndexWidgetState extends State {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Session List")),
+      appBar: AppBar(title: Text(title())),
       body: FutureBuilder<List<Session>>(
         future: readJson(),
         builder: (context, snapshot) {
@@ -68,12 +70,16 @@ class SessionIndexWidgetState extends State {
                 ],
               ),
               const Divider(),
-              _SessionIndexList(all, filterDate, filter)
+              getSessionIndexList()
             ],
           );
         },
       ),
     );
+  }
+
+  Widget getSessionIndexList() {
+    return SessionIndexList(all, filterDate, filter);
   }
 
 
@@ -131,13 +137,13 @@ class SessionIndexWidgetState extends State {
   }
 }
 
-class _SessionIndexList extends StatelessWidget{
+class SessionIndexList extends StatelessWidget{
 
   final List<Session> _all;
   final int filterDate;
   final Filter filter;
 
-  const _SessionIndexList(this._all, this.filterDate, this.filter);
+  const SessionIndexList(this._all, this.filterDate, this.filter, {Key? key}) : super(key: key);
 
   List<Session> _filterList()
   {

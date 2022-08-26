@@ -45,6 +45,7 @@ class _SessionWidgetState extends State<SessionWidget> {
           Expanded(
             child: GestureDetector(
               onTap: () => {Navigator.push(context, MaterialPageRoute(builder: ((context) => SessionDetailsWidget(_session))))},
+              behavior: HitTestBehavior.translucent,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

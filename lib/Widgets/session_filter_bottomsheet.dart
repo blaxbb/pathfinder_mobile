@@ -45,7 +45,7 @@ class SessionFilterBottomsheetState extends State {
     return <Widget>[
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Text(title, style: TextStyle(fontSize: 18),),
+        child: Text(title, style: const TextStyle(fontSize: 18),),
       ),
       Wrap(
         spacing: 8,
