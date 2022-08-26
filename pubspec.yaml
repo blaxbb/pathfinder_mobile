@@ -37,6 +37,7 @@ dependencies:
   intl: ^0.17.0
   flutter_html: ^3.0.0-alpha.5
   url_launcher: ^6.1.5  
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:

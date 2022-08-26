@@ -1,5 +1,6 @@
 import 'package:pathfinder_mobile/Widgets/session_details_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Data/session.dart';
 
@@ -21,17 +22,14 @@ class _SessionWidgetState extends State<SessionWidget> {
 
   @override
   Widget build(BuildContext context) {
+      loadFavorited();
       return Container(
         margin: const EdgeInsets.all(0),
         padding: const EdgeInsets.all(8),
         child: Row(children: [
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () => {
-              setState(() {
-                tapped = !tapped;
-              },)
-            },
+            onTap: () => setFavorited(),
             child: Container(
               padding: const EdgeInsets.only(right: 8),
               child: Icon(
@@ -71,5 +69,32 @@ class _SessionWidgetState extends State<SessionWidget> {
           ),
         ])
     );
+  }
+
+  Future<void> loadFavorited() async {
+    final prefs = await SharedPreferences.getInstance();
+    if(mounted)
+    {
+      setState(() {
+        var id = _session.id;
+        tapped = prefs.getBool("favorite_$id") ?? false;
+      });
+    }
+  }
+
+  Future<void> setFavorited() async {
+    var state = !tapped;
+    setState(() {
+      tapped = state;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    var id = _session.id;
+      if(state) {
+        prefs.setBool("favorite_$id", true);
+      }
+      else {
+        prefs.remove("favorite_$id");
+      }
   }
 }

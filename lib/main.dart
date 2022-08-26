@@ -56,6 +56,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return List<Session>.from(data.map((e) => Session.fromJson(e)));
   }
 
+  var all = readJson();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Featured Sessions"),
@@ -67,20 +69,25 @@ class _MyHomePageState extends State<MyHomePage> {
               decoration: BoxDecoration(
                 color: Colors.blue
               ),
-              child: Text("Title"),
+              child: Text("SIGGRAPH Pathfinder"),
             ),
             ListTile(
               title: const Text("All"),
-              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget())),
+              onTap: () => Navigator
+              .push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget()))
+              .then((value) {Navigator.pop(context); all = readJson();}),
             ),
-            const Text("AAAA"),
-            const Text("BBBB"),
-            const Text("CCCC"),
+            ListTile(
+              title: const Text("Favorites"),
+              onTap: () => Navigator
+              .push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget()))
+              .then((value) {Navigator.pop(context); all = readJson();}),
+            ),
           ],
         ),
       ),
       body: FutureBuilder<List<Session>>(
-        future: readJson(),
+        future: all,
         builder: (context, snapshot) {
           if(!snapshot.hasData)
           {
