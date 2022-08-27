@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -131,7 +132,7 @@ class SessionDetailsWidgetState extends State {
       Expanded(
         child: Column( children: [
           Text("Start Time", style: Theme.of(context).textTheme.titleLarge),
-          Text(_session.timeSlot!.startTime!.simpleTime(), style: Theme.of(context).textTheme.bodyMedium)
+          Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.uTC!.subtract(const Duration(hours: 7)))} ${_session.timeSlot!.startTime!.simpleTime()}", style: Theme.of(context).textTheme.bodyMedium)
         ],)
       ),
       Expanded(

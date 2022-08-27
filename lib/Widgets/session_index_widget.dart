@@ -56,21 +56,25 @@ class SessionIndexWidgetState extends State {
 
           return Column(
             children: [
-              Wrap(
-                children: _dayButtons(start, end).toList(),
-              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
+                child: Wrap(
+                  spacing: 4,
+                  children: _dayButtons(start, end).toList(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8,0,8,8),
                 child: TextField(
                   controller: controller,
                   onChanged: (value) => setState(() {
                     filter.search = value;
                   }),
                   decoration: InputDecoration(
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     hintText: "Search",
                     suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
+                      icon: const Icon(Icons.clear),
                       onPressed: () {
                         setState(() {
                           controller.clear();

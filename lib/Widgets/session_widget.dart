@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:pathfinder_mobile/Widgets/session_details_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,10 +58,7 @@ class _SessionWidgetState extends State<SessionWidget> {
                     children: [
                       _session.timeSlot?.startTime?.eventTime == null
                           ? const SizedBox.shrink()
-                          : Text(_session.timeSlot!.startTime!.uTC!.day.toString()),
-                      _session.timeSlot?.startTime?.eventTime == null
-                          ? const SizedBox.shrink()
-                          : Expanded(child: Text(_session.timeSlot!.startTime!.simpleTime())),
+                          : Expanded(child: Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.uTC!.subtract(const Duration(hours: 7)))} ${_session.timeSlot!.startTime!.simpleTime()}")),
                       const SizedBox(width: 8),
                       _session.timeSlot?.endTime?.eventTime == null
                           ? const SizedBox.shrink()

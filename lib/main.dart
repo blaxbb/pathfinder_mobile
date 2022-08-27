@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget()))
               .then((value) {Navigator.pop(context); setState(() {
-                all = readJson();
+                
               });}),
             ),
             ListTile(
@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => const SessionFavoritesWidget()))
               .then((value) {Navigator.pop(context); setState(() {
-                all = readJson();
+                
               });}),
             ),
           ],
@@ -104,7 +104,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: FutureBuilder<List<Session>>(
         future: all,
         builder: (context, snapshot) {
-          if(!snapshot.hasData)
+          if(snapshot.connectionState != ConnectionState.done)
           {
             return const CircularProgressIndicator();
           }
@@ -124,15 +124,15 @@ class _MyHomePageState extends State<MyHomePage> {
             return ListView(
               children: [
                 SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${dt.day}th 12:30PM)",),
-                SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == 8).toList(), title: "Featured Speakers",),
+                SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Featured Speakers",),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42131 && element.timeSlot!.startTime!.eventTime!.day == 8).toList(), title: "Frontiers",)
+                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42131 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Frontiers",)
                       ),
                     Expanded(
-                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42137 && element.timeSlot!.startTime!.eventTime!.day == 8).toList(), title: "Production Sessions",),
+                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42137 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Production Sessions",),
                     ),
                   ]
                 )
