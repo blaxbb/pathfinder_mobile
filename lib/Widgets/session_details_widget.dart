@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Data/session.dart';
@@ -20,7 +21,8 @@ class SessionDetailsWidgetState extends State {
 
   @override
   Widget build(BuildContext context) {
-    
+    loadFavorited();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Session Info")),
       body: Center(
@@ -71,15 +73,40 @@ class SessionDetailsWidgetState extends State {
     );
   }
 
+  Future<void> loadFavorited() async {
+    final prefs = await SharedPreferences.getInstance();
+    if(mounted)
+    {
+      setState(() {
+        var id = _session.id;
+        _tapped = prefs.getBool("favorite_$id") ?? false;
+      });
+    }
+  }
+
+  Future<void> setFavorited() async {
+    var state = !_tapped;
+    setState(() {
+      _tapped = state;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    var id = _session.id;
+      if(state) {
+        prefs.setBool("favorite_$id", true);
+      }
+      else {
+        prefs.remove("favorite_$id");
+      }
+  }  
+
   Widget _titleWidget() {
     return Row(
       children: [
         GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onTap: () => {
-              setState(() {
-                _tapped = !_tapped;
-              },)
+            onTap: () async => {
+              await setFavorited()
             },
             child: Container(
               padding: const EdgeInsets.only(right: 8, left: 8),
