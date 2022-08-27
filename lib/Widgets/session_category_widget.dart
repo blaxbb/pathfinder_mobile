@@ -15,7 +15,8 @@ class SessionCategoryWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(),
-        borderRadius: const BorderRadius.all(Radius.circular(8))
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        color: Theme.of(context).dialogBackgroundColor
       ),
       padding: const EdgeInsets.all(8),
       margin: const EdgeInsets.all(8),

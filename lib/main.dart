@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:pathfinder_mobile/Widgets/session_category_widget.dart';
 import 'package:pathfinder_mobile/Widgets/session_index_widget.dart';
@@ -85,13 +86,17 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text("All"),
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => const SessionIndexWidget()))
-              .then((value) {Navigator.pop(context); all = readJson();}),
+              .then((value) {Navigator.pop(context); setState(() {
+                all = readJson();
+              });}),
             ),
             ListTile(
               title: const Text("Favorites"),
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => const SessionFavoritesWidget()))
-              .then((value) {Navigator.pop(context); all = readJson();}),
+              .then((value) {Navigator.pop(context); setState(() {
+                all = readJson();
+              });}),
             ),
           ],
         ),
@@ -109,8 +114,16 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           else
           {
+
+            var dt = DateTime.now().toUtc();
+            dt = DateTime.utc(2022, 8, Random().nextInt(4) + 8, 12, 30).add(const Duration(hours: 7));
+
+            var upcoming = snapshot.data!.where((s) => s.timeSlot!.startTime!.eventTime!.millisecondsSinceEpoch > dt.millisecondsSinceEpoch)
+              .toList();
+
             return ListView(
               children: [
+                SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${dt.day}th 12:30PM)",),
                 SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == 8).toList(), title: "Featured Speakers",),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -57,6 +57,9 @@ class _SessionWidgetState extends State<SessionWidget> {
                     children: [
                       _session.timeSlot?.startTime?.eventTime == null
                           ? const SizedBox.shrink()
+                          : Text(_session.timeSlot!.startTime!.uTC!.day.toString()),
+                      _session.timeSlot?.startTime?.eventTime == null
+                          ? const SizedBox.shrink()
                           : Expanded(child: Text(_session.timeSlot!.startTime!.simpleTime())),
                       const SizedBox(width: 8),
                       _session.timeSlot?.endTime?.eventTime == null
