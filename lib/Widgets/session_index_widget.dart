@@ -174,6 +174,13 @@ class SessionIndexList extends StatelessWidget{
     if(filter.search?.isNotEmpty ?? false)
     {
       var fuzz = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.title!,);
+      var fuzzBody = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.description!);
+      fuzz.addAll(fuzzBody);
+
+      var duplicate = <int>{};
+      fuzz.retainWhere((element) => duplicate.add(element.index));
+
+      fuzz.sort((a,b) => b.score.compareTo(a.score));
       return fuzz.map((e) => e.choice).toList();
     }
 
