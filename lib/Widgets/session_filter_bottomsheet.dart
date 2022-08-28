@@ -37,23 +37,21 @@ class SessionFilterBottomsheetState extends State {
 
     return ListView(
       children: [
-        Expanded(
-          child: TextField(
-            controller: controller,
-            onChanged: (value) { filter.search = value; },
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: "Search",
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  setState(() {
-                    controller.clear();
-                    filter.search = "";
-                  });
-                },
-              )
-            ),
+        TextField(
+          controller: controller,
+          onChanged: (value) { filter.search = value; },
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: "Search",
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  controller.clear();
+                  filter.search = "";
+                });
+              },
+            )
           ),
         ),
         ...filterGroup("Regitration Level", regs, filter.registrationFilters),

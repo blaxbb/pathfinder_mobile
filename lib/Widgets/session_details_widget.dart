@@ -25,7 +25,20 @@ class SessionDetailsWidgetState extends State {
     loadFavorited();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Session Info")),
+      appBar: AppBar(
+        title: const Text("Session Info"),
+        actions: [
+          IconButton(
+            onPressed: () async { await setFavorited(); },
+            icon: Icon(
+              _tapped ? Icons.star : Icons.star_border,
+              shadows: [
+                Shadow(color: _tapped ? Colors.black : Colors.transparent, offset: const Offset(0,0), blurRadius: 2)
+              ]),
+            color: _tapped ? Colors.yellow : Colors.black,
+          )
+        ],
+      ),
       body: Center(
         child: ListView(
           padding: const EdgeInsets.all(8),
@@ -102,28 +115,7 @@ class SessionDetailsWidgetState extends State {
   }  
 
   Widget _titleWidget() {
-    return Row(
-      children: [
-        GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () async => {
-              await setFavorited()
-            },
-            child: Container(
-              padding: const EdgeInsets.only(right: 8, left: 8),
-              child: Icon(
-                _tapped ? Icons.star : Icons.star_border,
-                color: _tapped ? Colors.yellow : Colors.black,
-                shadows: [
-                  Shadow(color: _tapped ? Colors.black : Colors.transparent, offset: const Offset(0,0), blurRadius: 2
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(child: Text(_session.title!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24))),
-      ],
-    );
+    return Text(_session.title!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24));
   }
 
   Widget _timeWidget()
