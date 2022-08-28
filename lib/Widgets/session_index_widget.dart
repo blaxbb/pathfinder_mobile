@@ -65,25 +65,49 @@ class SessionIndexWidgetState extends State {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8,0,8,8),
-                child: TextField(
-                  controller: controller,
-                  onChanged: (value) => setState(() {
-                    filter.search = value;
-                  }),
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: "Search",
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: (){
                         setState(() {
-                          controller.clear();
-                          filter.search = "";
+                          displayFilter = !displayFilter;
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return StatefulBuilder(builder: (context, setState) {
+                                return SessionFilterBottomsheet(all, filter);
+                              });
+                            },
+                          ).whenComplete(() => setState(() {
+                            
+                          },));
                         });
                       },
-                    )
-                  ),
-                ),
+                      icon: const Icon(Icons.filter_alt)
+                    ),                   
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        onChanged: (value) => setState(() {
+                          filter.search = value;
+                        }),
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          hintText: "Search",
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                controller.clear();
+                                filter.search = "";
+                              });
+                            },
+                          )
+                        ),
+                      ),
+                    ),
+                  ]
+                )
               ),
               Wrap(
                 spacing: 8,
@@ -144,24 +168,6 @@ class SessionIndexWidgetState extends State {
         child: Column(children: [Text(day.day.toString()), Text(DateFormat('EEEE').format(day))])
       );
     }
-    yield IconButton(
-      onPressed: (){
-        setState(() {
-          displayFilter = !displayFilter;
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return StatefulBuilder(builder: (context, setState) {
-                return SessionFilterBottomsheet(all, filter);
-              });
-            },
-          ).whenComplete(() => setState(() {
-            
-          },));
-        });
-      },
-      icon: const Icon(Icons.filter_alt)
-    );
   }
 }
 

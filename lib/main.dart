@@ -49,6 +49,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  Future<void> _pullRefresh() async {
+      setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -121,22 +125,25 @@ class _MyHomePageState extends State<MyHomePage> {
             var upcoming = snapshot.data!.where((s) => s.timeSlot!.startTime!.eventTime!.millisecondsSinceEpoch > dt.millisecondsSinceEpoch)
               .toList();
 
-            return ListView(
-              children: [
-                SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${dt.day}th 12:30PM)",),
-                SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Featured Speakers",),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42131 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Frontiers",)
+            return RefreshIndicator(
+              onRefresh: _pullRefresh,
+              child: ListView(
+                children: [
+                  SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${dt.day}th 12:30PM)",),
+                  SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Featured Speakers",),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42131 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Frontiers",)
+                        ),
+                      Expanded(
+                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42137 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Production Sessions",),
                       ),
-                    Expanded(
-                      child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42137 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Production Sessions",),
-                    ),
-                  ]
-                )
-              ],
+                    ]
+                  )
+                ],
+              ),
             );
           }
         },
