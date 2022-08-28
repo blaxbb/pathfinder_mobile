@@ -20,8 +20,10 @@ class SessionFilterBottomsheetState extends State {
 
   List<Session> all;
   Filter filter;
+  final controller = TextEditingController();
 
   SessionFilterBottomsheetState(this.all, this.filter);
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +33,29 @@ class SessionFilterBottomsheetState extends State {
     var keywords = all.expand((s) => s.keywords()).toSet();
     var areas = all.expand((s) => s.interestAreas()).toSet();
 
+    controller.text = filter.search ?? "";
+
     return ListView(
       children: [
+        Expanded(
+          child: TextField(
+            controller: controller,
+            onChanged: (value) { filter.search = value; },
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: "Search",
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  setState(() {
+                    controller.clear();
+                    filter.search = "";
+                  });
+                },
+              )
+            ),
+          ),
+        ),
         ...filterGroup("Regitration Level", regs, filter.registrationFilters),
         ...filterGroup("Track", tracks, filter.trackFilters),
         ...filterGroup("Keywords", keywords, filter.keywordFilters),

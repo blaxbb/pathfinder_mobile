@@ -39,7 +39,28 @@ class SessionIndexWidgetState extends State {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(title: Text(title())),
+      appBar: AppBar(
+        title: Text(title()),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                displayFilter = !displayFilter;
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) {
+                    return StatefulBuilder(builder: (context, setState) {
+                      return SessionFilterBottomsheet(all, filter);
+                    });
+                  },
+                ).whenComplete(() => setState(() {
+                  
+                },));
+              });
+            },
+            icon: Icon(Icons.search))
+        ],
+      ),
       body: FutureBuilder<List<Session>>(
         future: readJson(),
         builder: (context, snapshot) {
@@ -63,62 +84,22 @@ class SessionIndexWidgetState extends State {
                   children: _dayButtons(start, end).toList(),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(8,0,8,8),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: (){
-                        setState(() {
-                          displayFilter = !displayFilter;
-                          showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return StatefulBuilder(builder: (context, setState) {
-                                return SessionFilterBottomsheet(all, filter);
-                              });
-                            },
-                          ).whenComplete(() => setState(() {
-                            
-                          },));
-                        });
-                      },
-                      icon: const Icon(Icons.filter_alt)
-                    ),                   
-                    Expanded(
-                      child: TextField(
-                        controller: controller,
-                        onChanged: (value) => setState(() {
-                          filter.search = value;
-                        }),
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText: "Search",
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              setState(() {
-                                controller.clear();
-                                filter.search = "";
-                              });
-                            },
-                          )
-                        ),
-                      ),
-                    ),
-                  ]
-                )
-              ),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  filter.search?.isEmpty ?? true ?
+                    SizedBox.shrink() :
+                    FilterChip(
+                      label: Text(filter.search ?? ""),
+                      onSelected: (value) => setState(() {
+                        filter.search = "";
+                      }),
+                    ),
                   ...filterChip(filter.registrationFilters),
                   ...filterChip(filter.trackFilters),
                   ...filterChip(filter.keywordFilters),
                   ...filterChip(filter.areaFilters),
-
-
                 ],
               ),
               const Divider(),
@@ -141,7 +122,6 @@ class SessionIndexWidgetState extends State {
         (f) => FilterChip(
           label: Text(f),
           selected: true,
-          selectedColor: Colors.blue[100],
           onSelected: ((value) {
             setState(() => filters.remove(f));
           })
@@ -165,7 +145,12 @@ class SessionIndexWidgetState extends State {
           backgroundColor: filterDate == day.day ? Theme.of(context).backgroundColor : Theme.of(context).highlightColor,
           padding: const EdgeInsets.all(12),
         ),
-        child: Column(children: [Text(day.day.toString()), Text(DateFormat('EEEE').format(day))])
+        child: Column(
+          children: [
+            Text(day.day.toString(), style: Theme.of(context).textTheme.bodyMedium),
+            Text(DateFormat('EEEE').format(day), style: Theme.of(context).textTheme.bodyMedium)
+          ]
+        )
       );
     }
   }
