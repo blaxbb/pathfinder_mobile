@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MapWidget extends StatefulWidget {
 
@@ -12,22 +14,37 @@ class MapWidget extends StatefulWidget {
 class MapWidgetState extends State<MapWidget> {
 
   final clickPos = ValueNotifier<Offset?>(null);
+  PathPainter? painter;
+
+  Future<PathPainter?> loadMap(String map) async {
+    var map = Image.asset("assets/map_level_2.png");
+    var mapData = await rootBundle.loadString("assets/maps/map_level_2.json");
+    painter = PathPainter(repaint: clickPos);
+    var iter = jsonDecode(mapData) as List;
+var nodes = iter.map((e) => MapNode.fromJson(e)).toList();
+    painter!.nodes = nodes;
+    return painter;
+  }
 
   Widget build(BuildContext context) {
 
     var map = Image.asset("assets/map_level_2.png");
-    var painter = PathPainter(repaint: clickPos);
+
     return Scaffold(
       appBar: AppBar(title: Text("Map")),
       body: Center(
         child: 
           Listener(
             onPointerDown: (event) {
+              if(painter == null) {
+                return;
+              }
+
               clickPos.value = event.localPosition;
               debugPrint(event.buttons.toString());
-              var scaled = Offset(event.localPosition.dx / painter.prevSize!.width, event.localPosition.dy / painter.prevSize!.height);
+              var scaled = Offset(event.localPosition.dx / painter!.prevSize!.width, event.localPosition.dy / painter!.prevSize!.height);
 
-              var copy = painter.nodes.toList();
+              var copy = painter!.nodes.toList();
               copy.sort((a, b) => (scaled - a.location).distanceSquared.compareTo((scaled - b.location).distanceSquared));
               var nearest = copy.isEmpty ? null : copy.first;
 
@@ -37,18 +54,18 @@ class MapWidgetState extends State<MapWidget> {
                 //painter.clickPos = event.localPosition;
                 var newNode = MapNode(scaled, {});
 
-                if(painter.selectedNode != null) {
-                  var parentIndex = painter.nodes.indexOf(painter.selectedNode!);
+                if(painter!.selectedNode != null) {
+                  var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
                   newNode.siblings.add(parentIndex);
-                  painter.selectedNode!.siblings.add(painter.nodes.length);
+                  painter!.selectedNode!.siblings.add(painter!.nodes.length);
                 }
 
-                painter.nodes.add(newNode);
-                painter.selectedNode = newNode;
+                painter!.nodes.add(newNode);
+                painter!.selectedNode = newNode;
               }
-              else if(event.buttons == 2 && painter.nodes.isNotEmpty && nearest != null) {
-                var nearIndex = painter.nodes.indexOf(nearest);
-                for(var node in painter.nodes) {
+              else if(event.buttons == 2 && painter!.nodes.isNotEmpty && nearest != null) {
+                var nearIndex = painter!.nodes.indexOf(nearest);
+                for(var node in painter!.nodes) {
                   if(node == nearest) {
                     continue;
                   }
@@ -56,29 +73,50 @@ class MapWidgetState extends State<MapWidget> {
                   node.siblings.remove(nearIndex);
                   node.siblings = node.siblings.map((i) => i > nearIndex ? i - 1 : i).toSet();
                 }
-                painter.nodes.remove(nearest);
+                painter!.nodes.remove(nearest);
 
-                if(painter.selectedNode == nearest) {
-                  painter.selectedNode = null;
+                if(painter!.selectedNode == nearest) {
+                  painter!.selectedNode = null;
                 }
 
               }
               else if(event.buttons == 4 && nearest != null) {
-                painter.selectedNode = nearest;
+                if(painter!.selectedNode == nearest) {
+                  var jstest = nearest.toJson();
+                  debugPrint(jsonEncode(painter!.nodes));
+                }
+                painter!.selectedNode = nearest;
               }
-              else if(event.buttons == 16 && painter.selectedNode != null && nearest != null) {
-                if(nearest != painter.selectedNode)
+              else if(event.buttons == 16 && painter!.selectedNode != null && nearest != null) {
+                if(nearest != painter!.selectedNode)
                 {
-                  var parentIndex = painter.nodes.indexOf(painter.selectedNode!);
-                  var nearIndex = painter.nodes.indexOf(nearest);
+                  var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
+                  var nearIndex = painter!.nodes.indexOf(nearest);
                   nearest.siblings.add(parentIndex);
-                  painter.selectedNode!.siblings.add(nearIndex);
+                  painter!.selectedNode!.siblings.add(nearIndex);
+                }
+              }
+              else if(event.buttons == 8 && painter!.selectedNode != null && nearest != null) {
+                if(nearest != painter!.selectedNode)
+                {
+                  var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
+                  var nearIndex = painter!.nodes.indexOf(nearest);
+                  nearest.siblings.remove(parentIndex);
+                  painter!.selectedNode!.siblings.remove(nearIndex);
                 }
               }
             },
-            child: CustomPaint(
-              foregroundPainter: painter,
-              child: map,
+            child: FutureBuilder<PathPainter?>(
+              future: loadMap("map_level_2"),
+              builder: (context, snapshot) {
+                if(snapshot.hasData) {
+                  return CustomPaint(
+                    foregroundPainter: painter,
+                    child: map,
+                  );
+                }
+                return CircularProgressIndicator();
+              },
             ),
           )
       )
@@ -180,6 +218,17 @@ class MapNode {
   MapNode? _pathfindingParent;
   
   MapNode(this.location, this.siblings);
+
+  MapNode.fromJson(Map<String, dynamic> json)
+    : location = Offset(json['x'], json['y']),
+      siblings = (json['siblings'] as List).cast<int>().toSet();
+
+  Map<String, dynamic> toJson() => {
+    'x': location.dx,
+    'y': location.dy,
+    'siblings': siblings.toList()
+  };
+
 
   double gScore(MapNode? other) {
     if(other == null) {
