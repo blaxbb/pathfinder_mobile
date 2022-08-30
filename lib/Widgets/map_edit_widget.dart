@@ -17,16 +17,24 @@ class MapEditWidgetState extends State<MapEditWidget> {
 
   final clickPos = ValueNotifier<Offset?>(null);
   MapEditPainter? painter;
+  String nameValue = "";
+  
+  MapNode? selectedNode;
+  List<MapNode>? nodes;
 
   Future<MapEditPainter?> loadMap(String map) async {
     var map = Image.asset("assets/map_level_2.png");
     var mapData = await rootBundle.loadString("assets/maps/map_level_2.json");
 
-    var iter = jsonDecode(mapData) as List;
-    var nodes = iter.map((e) => MapNode.fromJson(e)).toList();
+    if(nodes == null) {
+      var iter = jsonDecode(mapData) as List;
+      var jsonNodes = iter.map((e) => MapNode.fromJson(e)).toList();
+      nodes = jsonNodes;
+    }
 
     painter = MapEditPainter(repaint: clickPos);
-    painter!.nodes = nodes;
+    painter!.nodes = nodes!;
+    painter!.selectedNode = selectedNode;
 
     return painter;
   }
@@ -39,73 +47,125 @@ class MapEditWidgetState extends State<MapEditWidget> {
       appBar: AppBar(title: Text("Map")),
       body: Center(
         child: 
-          Listener(
-            onPointerDown: (event) {
-              if(painter == null) {
-                return;
-              }
+          ListView(
+            children: [
+              Listener(
+                onPointerDown: (event) {
+                  if(painter == null) {
+                    return;
+                  }
 
-              clickPos.value = event.localPosition;
-              var scaled = Offset(event.localPosition.dx / painter!.prevSize!.width, event.localPosition.dy / painter!.prevSize!.height);
+                  clickPos.value = event.localPosition;
+                  var scaled = Offset(event.localPosition.dx / painter!.prevSize!.width, event.localPosition.dy / painter!.prevSize!.height);
 
-              var copy = painter!.nodes.toList();
-              copy.sort((a, b) => (scaled - a.location).distanceSquared.compareTo((scaled - b.location).distanceSquared));
-              var nearest = copy.isEmpty ? null : copy.first;
+                  var copy = painter!.nodes.toList();
+                  copy.sort((a, b) => (scaled - a.location).distanceSquared.compareTo((scaled - b.location).distanceSquared));
+                  var nearest = copy.isEmpty ? null : copy.first;
 
-              switch (event.buttons) {
-                case 1:
-                  _addNode(scaled);
-                  break;
-                case 2:
-                  if(painter!.nodes.isNotEmpty && nearest != null) {
-                    _removeNode(nearest);
+                  switch (event.buttons) {
+                    case 1:
+                      _addNode(scaled);
+                      break;
+                    case 2:
+                      if(painter!.nodes.isNotEmpty && nearest != null) {
+                        _removeNode(nearest);
+                      }
+                      break;
+                    case 4:
+                      if(nearest != null) {
+                        _selectNode(nearest);
+                      }
+                      break;
+                    case 16:
+                      if(selectedNode != null && nearest != null) {
+                        _addLink(nearest);
+                      }
+                      break;
+                    case 8:
+                      if(selectedNode != null && nearest != null) {
+                        _removeLink(nearest);
+                      }
+                      break;
                   }
-                  break;
-                case 4:
-                  if(nearest != null) {
-                    _selectNode(nearest);
-                  }
-                  break;
-                case 16:
-                  if(painter!.selectedNode != null && nearest != null) {
-                    _addLink(nearest);
-                  }
-                  break;
-                case 8:
-                  if(painter!.selectedNode != null && nearest != null) {
-                    _removeLink(nearest);
-                  }
-                  break;
-              }
-            },
-            child: FutureBuilder<MapEditPainter?>(
-              future: loadMap("map_level_2"),
-              builder: (context, snapshot) {
-                if(snapshot.hasData) {
-                  return CustomPaint(
-                    foregroundPainter: painter,
-                    child: map,
-                  );
-                }
-                return const CircularProgressIndicator();
-              },
-            ),
+
+                  setState(() {
+                    
+                  });
+                },
+                child: FutureBuilder<MapEditPainter?>(
+                  future: loadMap("map_level_2"),
+                  builder: (context, snapshot) {
+                    if(snapshot.hasData) {
+                      return CustomPaint(
+                        foregroundPainter: painter,
+                        child: map,
+                      );
+                    }
+                    return const CircularProgressIndicator();
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Flexible(
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            nameValue = value;
+                          });
+                        }
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        setState(() {
+                          selectedNode?.names.add(nameValue);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Divider(),
+              ...(selectedNode?.names.map((e) => 
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(e)),
+                          IconButton(
+                            onPressed: (){
+                              setState(() {
+                               selectedNode!.names.remove(e);
+                              });
+                             },
+                            icon: Icon(Icons.delete)
+                          )
+                        ]
+                      ),
+                    )
+                  ) ?? [])
+            ],
           )
       )
     );
   }
 
   void _addNode(Offset scaled) {
-    var newNode = MapNode(scaled, {});
+    var newNode = MapNode(scaled, {}, {});
     
-    if(painter!.selectedNode != null) {
-      var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
+    if(selectedNode != null) {
+      var parentIndex = painter!.nodes.indexOf(selectedNode!);
       newNode.siblings.add(parentIndex);
-      painter!.selectedNode!.siblings.add(painter!.nodes.length);
+      selectedNode!.siblings.add(painter!.nodes.length);
     }
     
     painter!.nodes.add(newNode);
-    painter!.selectedNode = newNode;
+    selectedNode = newNode;
+    painter!.selectedNode = selectedNode;
   }
 
   void _removeNode(MapNode nearest) {
@@ -120,39 +180,44 @@ class MapEditWidgetState extends State<MapEditWidget> {
     }
     painter!.nodes.remove(nearest);
     
-    if(painter!.selectedNode == nearest) {
-      painter!.selectedNode = null;
+    if(selectedNode == nearest) {
+      selectedNode = null;
     }
+    painter!.selectedNode = selectedNode;  
   }
 
   void _selectNode(MapNode nearest) {
-    if(painter!.selectedNode == nearest) {
+    if(selectedNode == nearest) {
       debugPrint(jsonEncode(painter!.nodes));
-      painter!.selectedNode = null;
+      selectedNode = null;
     }
     else {
-      painter!.selectedNode = nearest;
+      selectedNode = nearest;
     }
+    painter!.selectedNode = selectedNode;
   }
 
+
   void _addLink(MapNode nearest) {
-    if(nearest != painter!.selectedNode)
+    if(nearest != selectedNode)
     {
-      var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
+      var parentIndex = painter!.nodes.indexOf(selectedNode!);
       var nearIndex = painter!.nodes.indexOf(nearest);
       nearest.siblings.add(parentIndex);
-      painter!.selectedNode!.siblings.add(nearIndex);
+      selectedNode!.siblings.add(nearIndex);
     }
+    painter!.selectedNode = selectedNode;
   }
 
   void _removeLink(MapNode nearest) {
-    if(nearest != painter!.selectedNode)
+    if(nearest != selectedNode)
     {
-      var parentIndex = painter!.nodes.indexOf(painter!.selectedNode!);
+      var parentIndex = painter!.nodes.indexOf(selectedNode!);
       var nearIndex = painter!.nodes.indexOf(nearest);
       nearest.siblings.remove(parentIndex);
-      painter!.selectedNode!.siblings.remove(nearIndex);
+      selectedNode!.siblings.remove(nearIndex);
     }
+    painter!.selectedNode = selectedNode;
   }
 
 }
@@ -161,11 +226,10 @@ class MapEditPainter extends CustomPainter {
 
   MapEditPainter({required Listenable repaint}) : super(repaint: repaint);
 
+  MapNode? selectedNode;
   var clickedPoints = <Offset>[
 
   ];
-
-  MapNode? selectedNode;
 
   var nodes = <MapNode>[];
 

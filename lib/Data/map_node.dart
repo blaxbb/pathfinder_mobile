@@ -13,7 +13,7 @@ class MapNode {
   MapNode.fromJson(Map<String, dynamic> json)
     : location = Offset(json['x'], json['y']),
       siblings = (json['siblings'] as List).cast<int>().toSet(),
-      names = (json['names'] as List).cast<String>().toSet();
+      names = json.containsKey('names') ? (json['names'] as List).cast<String>().toSet() : {};
 
   Map<String, dynamic> toJson() => {
     'x': location.dx,
