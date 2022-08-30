@@ -203,10 +203,10 @@ class MapEditPainter extends CustomPainter {
       canvas.drawCircle(scale(n.location, size), 3, Paint());
     }
     
-    // var path = nodes[0].Path(nodes, nodes[13]);
+    // var path = nodes[0].path(nodes, nodes[13]);
     // if(path != null)
     // {
-    //   canvas.drawPoints(PointMode.polygon, path.map((e) => Scale(e.location, size)).toList(), Paint() ..color=Colors.red ..strokeWidth=8);
+    //   canvas.drawPoints(PointMode.polygon, path.map((e) => scale(e.location, size)).toList(), Paint() ..color=Colors.red ..strokeWidth=8);
     // }
   }
 

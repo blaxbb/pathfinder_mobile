@@ -4,19 +4,22 @@ class MapNode {
   Offset location;
   Set<int> siblings;
   Set<MapNode> siblingNodes(List<MapNode> nodes) => siblings.map<MapNode>((i) => nodes[i]).toSet();
+  Set<String> names;
 
   MapNode? _pathfindingParent;
   
-  MapNode(this.location, this.siblings);
+  MapNode(this.location, this.siblings, this.names);
 
   MapNode.fromJson(Map<String, dynamic> json)
     : location = Offset(json['x'], json['y']),
-      siblings = (json['siblings'] as List).cast<int>().toSet();
+      siblings = (json['siblings'] as List).cast<int>().toSet(),
+      names = (json['names'] as List).cast<String>().toSet();
 
   Map<String, dynamic> toJson() => {
     'x': location.dx,
     'y': location.dy,
-    'siblings': siblings.toList()
+    'siblings': siblings.toList(),
+    'names': names.toList()
   };
 
 

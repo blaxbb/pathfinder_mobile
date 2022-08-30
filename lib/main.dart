@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'Data/session.dart';
+import 'Widgets/map_navigate_widget.dart';
 import 'Widgets/session_favorites_widget.dart';
 import 'Widgets/map_edit_widget.dart';
 
@@ -106,11 +107,19 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: const Text("Map"),
               onTap: () => Navigator
-              .push(context, MaterialPageRoute(builder: (context) => MapEditWidget()))
+              .push(context, MaterialPageRoute(builder: (context) => MapNavigateWidget()))
               .then((value) {Navigator.pop(context); setState(() {
                 
               });}),
             ),            
+            ListTile(
+              title: const Text("Map Edit"),
+              onTap: () => Navigator
+              .push(context, MaterialPageRoute(builder: (context) => MapEditWidget()))
+              .then((value) {Navigator.pop(context); setState(() {
+                
+              });}),
+            ),
           ],
         ),
       ),
