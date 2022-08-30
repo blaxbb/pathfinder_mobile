@@ -8,16 +8,23 @@ import 'package:flutter/services.dart';
 import '../Data/map_node.dart';
 
 class MapNavigateWidget extends StatefulWidget {
+  String target;
+
+  MapNavigateWidget(this.target, {Key? key}) : super(key: key);
+
   @override
-  State<StatefulWidget> createState() => MapNavigateWidgetState();
+  State<StatefulWidget> createState() => MapNavigateWidgetState(target);
 
 }
 
 class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
+  String target;
   String? location = "101";
   MapNavigatePainter? painter;
   final nodes = ValueNotifier<List<MapNode>>([]);
+
+  MapNavigateWidgetState(this.target);
 
   Future<MapNavigatePainter?> loadMap(String map) async {
     var map = Image.asset("assets/map_level_2.png");
@@ -29,15 +36,21 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
     painter = MapNavigatePainter(repaint: this.nodes);
     this.nodes.value = nodes;
     painter!.nodes = nodes;
+    painter!.start = findNode(nodes, target);
+    painter!.end = findNode(nodes, location ?? "");
 
     return painter;
+  }
+
+  MapNode? findNode(List<MapNode> nodes, String name) {
+    return nodes.cast<MapNode?>().firstWhere((element) => element!.names.any((n)  => n.contains(name)), orElse: () => null);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Navigate"),
+        title: Text("Navigate to $target"),
       ),
       body: ListView(
         children: [
@@ -46,7 +59,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
             child: DropdownButton<String>(
               value: location,
               
-              items: ["100", "101", "102"].map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
+              items: ["100", "101", "208", "220"].map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
               onChanged: ((value) {setState(() {
                 location = value;
                 nodes.notifyListeners();
@@ -114,6 +127,8 @@ class MapNavigatePainter extends CustomPainter {
     //   }
     //   canvas.drawCircle(scale(n.location, size), 3, Paint());
     // }
+
+    //end = nodes.cast<MapNode?>().firstWhere((element) => element!.names.any((name)  => name.contains("208")), orElse: () => null);
 
     if(start != null && end != null) {
       var path = start!.path(nodes, end!);
