@@ -27,8 +27,8 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
   MapNavigateWidgetState(this.target);
 
   Future<MapNavigatePainter?> loadMap(String map) async {
-    var map = Image.asset("assets/map_level_2.png");
-    var mapData = await rootBundle.loadString("assets/maps/map_level_2.json");
+    var mapImage = Image.asset("assets/maps/$map.png");
+    var mapData = await rootBundle.loadString("assets/maps/$map.json");
 
     var iter = jsonDecode(mapData) as List;
     var nodes = iter.map((e) => MapNode.fromJson(e)).toList();

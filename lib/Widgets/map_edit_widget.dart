@@ -22,15 +22,20 @@ class MapEditWidgetState extends State<MapEditWidget> {
   MapNode? selectedNode;
   List<MapNode>? nodes;
 
-  Future<MapEditPainter?> loadMap(String map) async {
-    var map = Image.asset("assets/map_level_2.png");
-    var mapData = await rootBundle.loadString("assets/maps/map_level_2.json");
+  String mapName = "map_level_1";
+  String? prevMap = null;
 
-    if(nodes == null) {
+  Future<MapEditPainter?> loadMap(String map) async {
+    var mapImage = Image.asset("assets/maps/$map.png");
+    var mapData = await rootBundle.loadString("assets/maps/$map.json");
+
+    if(nodes == null || mapName != prevMap) {
       var iter = jsonDecode(mapData) as List;
       var jsonNodes = iter.map((e) => MapNode.fromJson(e)).toList();
       nodes = jsonNodes;
     }
+
+    prevMap = mapName;
 
     painter = MapEditPainter(repaint: clickPos);
     painter!.nodes = nodes!;
@@ -41,7 +46,7 @@ class MapEditWidgetState extends State<MapEditWidget> {
 
   Widget build(BuildContext context) {
 
-    Image map = Image.asset("assets/map_level_2.png");
+    Image map = Image.asset("assets/maps/$mapName.png");
 
     return Scaffold(
       appBar: AppBar(title: Text("Map")),
@@ -49,6 +54,16 @@ class MapEditWidgetState extends State<MapEditWidget> {
         child: 
           ListView(
             children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DropdownButton<String>(
+                  items: MapNode.allMaps().map(
+                    (e) => DropdownMenuItem(value: e, child: Text(e))
+                  ).toList(),
+                  onChanged: (value) => setState(() => mapName = value!),
+                  value: mapName,
+                ),
+              ),
               Listener(
                 onPointerDown: (event) {
                   if(painter == null) {
@@ -93,7 +108,7 @@ class MapEditWidgetState extends State<MapEditWidget> {
                   });
                 },
                 child: FutureBuilder<MapEditPainter?>(
-                  future: loadMap("map_level_2"),
+                  future: loadMap(mapName),
                   builder: (context, snapshot) {
                     if(snapshot.hasData) {
                       return CustomPaint(

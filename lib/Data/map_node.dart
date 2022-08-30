@@ -10,6 +10,13 @@ class MapNode {
   
   MapNode(this.location, this.siblings, this.names);
 
+  static List<String> allMaps() {
+    return [
+      "map_level_1",
+      "map_level_2",
+    ];
+  }
+
   MapNode.fromJson(Map<String, dynamic> json)
     : location = Offset(json['x'], json['y']),
       siblings = (json['siblings'] as List).cast<int>().toSet(),
