@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 
 import 'Data/session.dart';
 import 'Widgets/session_favorites_widget.dart';
-import 'Widgets/map_widget.dart';
+import 'Widgets/map_edit_widget.dart';
 
 void main() {
   runApp(const MyApp());
@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: const Text("Map"),
               onTap: () => Navigator
-              .push(context, MaterialPageRoute(builder: (context) => MapWidget()))
+              .push(context, MaterialPageRoute(builder: (context) => MapEditWidget()))
               .then((value) {Navigator.pop(context); setState(() {
                 
               });}),
