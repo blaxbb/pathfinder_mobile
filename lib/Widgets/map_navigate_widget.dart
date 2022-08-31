@@ -39,17 +39,16 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
     allLocations = nodes.value.map((n) => n.names.isNotEmpty ? n.names.first : "").toSet();
     allLocations.remove("");
+    var tmp = allLocations.toList();
+    tmp.sort((a,b) => a.compareTo(b));
+    allLocations = tmp.toSet();
 
     if(location == null && allLocations.isNotEmpty) {
-      location = allLocations.first;
+      location = "West Building, West Entrance";
     }
 
     var path = MapNode.buildPath(nodes.value, location ?? "", target);
     var paths = path == null ? null : MapNode.splitPath(path);
-
-    setState(() {
-      
-    });
 
     return paths;
   }
@@ -65,45 +64,49 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
       appBar: AppBar(
         title: Text("Navigate to $target"),
       ),
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: DropdownButton<String>(
-              value: location,
-              items: allLocations.map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
-              onChanged: ((value) {setState(() {
-                location = value;
-                nodes.notifyListeners();
-              });})
-            ),
-          ),
-          FutureBuilder<List<List<MapNode>>?>(
-            future: buildPath(),
-            builder: (context, snapshot) {
-              if(snapshot.hasData) {
+      body: FutureBuilder<List<List<MapNode>>?>(
+        future: buildPath(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState != ConnectionState.done) {
+            return CircularProgressIndicator();
+          }
+          if (snapshot.hasError) {
+            return Text("Navigation Error");
+          }
 
-                  return ListView.separated(
-                    shrinkWrap: true,
-                    physics: ClampingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      var path = snapshot.data![index];
-                      return CustomPaint(
-                        foregroundPainter: MapNavigatePainter(path),
-                        child: Image.asset("assets/maps/${path.first.map}.png"),
-                      );
-                    },
-                    itemCount: snapshot.data!.length,
-                    separatorBuilder: (context, index) {
-                      return const Divider();
-                    },
-                  );
-                }
-                return const CircularProgressIndicator();
-            },
-          )
-          
-        ],
+          return ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Text("Navigate From: "),
+                    SizedBox(width: 8,),
+                    Expanded(
+                      child: DropdownButton<String>(
+                        value: location,
+                        items: allLocations.map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
+                        onChanged: ((value) {setState(() {
+                          location = value;
+                          nodes.notifyListeners();
+                        });})
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ...(snapshot.data?.map((path) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: CustomPaint(
+                      foregroundPainter: MapNavigatePainter(path),
+                      child: Image.asset("assets/maps/${path.first.map}.png"),
+                    ),
+                );
+              }).toList()) ?? []
+            ],
+          );
+        },
       )
     );
   }

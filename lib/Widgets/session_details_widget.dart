@@ -144,10 +144,10 @@ class SessionDetailsWidgetState extends State {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Opacity(
+            const Opacity(
               opacity: 0,
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: EdgeInsets.all(8.0),
                 child: Icon(Icons.map),
               ),
             ),

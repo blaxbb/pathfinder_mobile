@@ -36,6 +36,7 @@ class MapNode {
     return [
       "map_level_1",
       "map_level_2",
+      "map_level_3"
     ];
   }
 
