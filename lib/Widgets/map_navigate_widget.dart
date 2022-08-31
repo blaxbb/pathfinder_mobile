@@ -20,26 +20,38 @@ class MapNavigateWidget extends StatefulWidget {
 class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
   String target;
-  String? location = "101";
-  MapNavigatePainter? painter;
+  String? location;
   final nodes = ValueNotifier<List<MapNode>>([]);
+  var allLocations = <String>{};
 
   MapNavigateWidgetState(this.target);
 
-  Future<MapNavigatePainter?> loadMap(String map) async {
-    var mapImage = Image.asset("assets/maps/$map.png");
-    var mapData = await rootBundle.loadString("assets/maps/$map.json");
+  Future<List<List<MapNode>>?> buildPath() async {
 
-    var iter = jsonDecode(mapData) as List;
-    var nodes = iter.map((e) => MapNode.fromJson(e)).toList();
+    nodes.value = [];
+    for(var mapName in MapNode.allMaps()) {
+      var data = await MapNode.load(mapName);
+      for(var node in data) {
+        node.siblings = node.siblings.map((e) => e + nodes.value.length).toSet();
+      }
+      nodes.value.addAll(data);
+    }
 
-    painter = MapNavigatePainter(repaint: this.nodes);
-    this.nodes.value = nodes;
-    painter!.nodes = nodes;
-    painter!.start = findNode(nodes, target);
-    painter!.end = findNode(nodes, location ?? "");
+    allLocations = nodes.value.map((n) => n.names.isNotEmpty ? n.names.first : "").toSet();
+    allLocations.remove("");
 
-    return painter;
+    if(location == null && allLocations.isNotEmpty) {
+      location = allLocations.first;
+    }
+
+    var path = MapNode.buildPath(nodes.value, location ?? "", target);
+    var paths = path == null ? null : MapNode.splitPath(path);
+
+    setState(() {
+      
+    });
+
+    return paths;
   }
 
   MapNode? findNode(List<MapNode> nodes, String name) {
@@ -48,6 +60,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Navigate to $target"),
@@ -58,21 +71,32 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
             padding: const EdgeInsets.all(8.0),
             child: DropdownButton<String>(
               value: location,
-              
-              items: ["100", "101", "208", "220"].map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
+              items: allLocations.map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
               onChanged: ((value) {setState(() {
                 location = value;
                 nodes.notifyListeners();
               });})
             ),
           ),
-          FutureBuilder<MapNavigatePainter?>(
-            future: loadMap("map_level_2"),
+          FutureBuilder<List<List<MapNode>>?>(
+            future: buildPath(),
             builder: (context, snapshot) {
               if(snapshot.hasData) {
-                  return CustomPaint(
-                    foregroundPainter: painter,
-                    child: Image.asset("assets/map_level_2.png"),
+
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      var path = snapshot.data![index];
+                      return CustomPaint(
+                        foregroundPainter: MapNavigatePainter(path),
+                        child: Image.asset("assets/maps/${path.first.map}.png"),
+                      );
+                    },
+                    itemCount: snapshot.data!.length,
+                    separatorBuilder: (context, index) {
+                      return const Divider();
+                    },
                   );
                 }
                 return const CircularProgressIndicator();
@@ -88,17 +112,9 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
 class MapNavigatePainter extends CustomPainter {
 
-  MapNavigatePainter({required Listenable repaint}) : super(repaint: repaint);
+  MapNavigatePainter(this.path);
 
-  var clickedPoints = <Offset>[
-
-  ];
-
-  var nodes = <MapNode>[];
-  MapNode? start;
-  MapNode? end;
-
-  Offset? clickPos;
+  List<MapNode>? path;
   Size? prevSize;
 
   @override
@@ -130,12 +146,14 @@ class MapNavigatePainter extends CustomPainter {
 
     //end = nodes.cast<MapNode?>().firstWhere((element) => element!.names.any((name)  => name.contains("208")), orElse: () => null);
 
-    if(start != null && end != null) {
-      var path = start!.path(nodes, end!);
-      if(path != null)
-      {
-        canvas.drawPoints(PointMode.polygon, path.map((e) => scale(e.location, size)).toList(), Paint() ..color=Colors.red ..strokeWidth=8 ..strokeCap=StrokeCap.round);
-      }
+    if(path != null)
+    {
+      canvas.drawPoints(PointMode.polygon, path!.map((e) => scale(e.location, size)).toList(), Paint() ..color=Colors.blue.shade400 ..strokeWidth=4 ..strokeCap=StrokeCap.round);
+      var start = path!.first;
+      var end = path!.last;
+
+      canvas.drawCircle(scale(start.location, size), 6, Paint() ..color=Colors.green ..strokeWidth=4 ..style=PaintingStyle.stroke);
+      canvas.drawCircle(scale(end.location, size), 6, Paint() ..color=Colors.red ..strokeWidth=4 ..style=PaintingStyle.stroke);
     }
     
     // int s = 0;
@@ -154,7 +172,7 @@ class MapNavigatePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+    return false;
   }
 
 }

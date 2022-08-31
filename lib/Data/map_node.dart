@@ -1,10 +1,32 @@
+import 'dart:convert';
 import 'dart:ui';
+
+import 'package:flutter/services.dart';
 
 class MapNode {
   Offset location;
   Set<int> siblings;
-  Set<MapNode> siblingNodes(List<MapNode> nodes) => siblings.map<MapNode>((i) => nodes[i]).toSet();
+  Set<MapNode> siblingNodes(List<MapNode> nodes) {
+    if(connectMap != null && connectMap!.isNotEmpty && connectNode != null && connectNode!.isNotEmpty) {
+      var node = findNode(nodes, "$connectMap$connectNode");
+      if(node != null) {
+        return {
+          ...siblings.map<MapNode>((i) => nodes[i]).toSet(),
+          node
+        };
+      }
+    }
+    
+    return {
+      ...siblings.map<MapNode>((i) => nodes[i]).toSet()
+    };
+  }
   Set<String> names;
+
+  String? connectMap;
+  String? connectNode;
+
+  String? map;
 
   MapNode? _pathfindingParent;
   
@@ -20,15 +42,29 @@ class MapNode {
   MapNode.fromJson(Map<String, dynamic> json)
     : location = Offset(json['x'], json['y']),
       siblings = (json['siblings'] as List).cast<int>().toSet(),
-      names = json.containsKey('names') ? (json['names'] as List).cast<String>().toSet() : {};
+      names = json.containsKey('names') ? (json['names'] as List).cast<String>().toSet() : {},
+      connectMap = json.containsKey('connectMap') ? json['connectMap'] as String? : null,
+      connectNode = json.containsKey('connectNode') ? json['connectNode'] as String? : null;
 
   Map<String, dynamic> toJson() => {
     'x': location.dx,
     'y': location.dy,
     'siblings': siblings.toList(),
-    'names': names.toList()
+    'names': names.toList(),
+    'connectMap': connectMap,
+    'connectNode': connectNode
   };
 
+  static MapNode? findNode(List<MapNode> nodes, String name) {
+    return nodes.cast<MapNode?>().firstWhere((element) => element!.names.any((n)  => n.contains(name)), orElse: () => null);
+  }
+
+  static Future<List<MapNode>> load(String filename) async {
+    var mapData = await rootBundle.loadString("assets/maps/$filename.json");
+
+    var iter = jsonDecode(mapData) as List;
+    return iter.map((e) => MapNode.fromJson(e) ..map = filename).toList();
+  }
 
   double _gScore(MapNode? other) {
     if(other == null) {
@@ -40,6 +76,47 @@ class MapNode {
 
   double _hScore(MapNode target) {
     return (target.location.dx - location.dx).abs() + (target.location.dy - location.dy).abs();
+  }
+
+  static List<MapNode>? buildPath(List<MapNode> nodes, String start, String end) {
+    var startNode = MapNode.findNode(nodes, start);
+    if(startNode == null) {
+      return null;
+    }
+
+    var targetNode = MapNode.findNode(nodes, end);
+    if(targetNode == null) {
+      return null;
+    }
+
+    return startNode.path(nodes, targetNode);
+  }
+
+  static List<List<MapNode>> splitPath(List<MapNode> path) {
+    var split = <List<MapNode>>[];
+    var tmp = <MapNode>[];
+    for(int i = 0; i + 1 < path.length; i++) {
+      var current = path[i];
+      var next = path[i + 1];
+      
+      tmp.add(current);
+
+      if(current.connectMap == null || current.connectNode == null || next.names.isEmpty) {
+        continue;
+      }
+
+      if("${current.connectMap}${current.connectNode}" == next.names.first) {
+        //SPLIT
+        split.add(tmp);
+        tmp = [];
+      }
+    }
+
+    tmp.add(path.last);
+
+    split.add(tmp);
+
+    return split;
   }
 
   List<MapNode>? path(List<MapNode> nodes, MapNode target) {
@@ -64,7 +141,7 @@ class MapNode {
 
         if(node == target) {
           //Winner!
-          return buildPath(node);
+          return _buildPath(node);
         }
 
         if(current == null) {
@@ -101,18 +178,17 @@ class MapNode {
         }
 
       }
-
     }
 
     return null;
   }
 
-  List<MapNode> buildPath(MapNode node) {
+  List<MapNode> _buildPath(MapNode node) {
     if(node._pathfindingParent == null) {
       return [node];
     }
 
-    var path = buildPath(node._pathfindingParent!);
+    var path = _buildPath(node._pathfindingParent!);
     path.add(node);
     return path;
 

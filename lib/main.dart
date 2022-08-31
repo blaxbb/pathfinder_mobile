@@ -107,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: const Text("Map"),
               onTap: () => Navigator
-              .push(context, MaterialPageRoute(builder: (context) => MapNavigateWidget("211")))
+              .push(context, MaterialPageRoute(builder: (context) => MapNavigateWidget("East Building, Ballroom C")))
               .then((value) {Navigator.pop(context); setState(() {
                 
               });}),

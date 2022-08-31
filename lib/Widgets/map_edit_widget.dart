@@ -48,6 +48,28 @@ class MapEditWidgetState extends State<MapEditWidget> {
 
     Image map = Image.asset("assets/maps/$mapName.png");
 
+    var connectMapController = TextEditingController(
+      text: selectedNode?.connectMap
+    );
+
+    connectMapController.addListener(() {
+      if(selectedNode != null) {
+        selectedNode!.connectMap = connectMapController.text.isEmpty ? null : connectMapController.text;
+        debugPrint(selectedNode!.connectMap);
+      }
+    });
+
+    var connectNodeController = TextEditingController(
+      text: selectedNode?.connectNode
+    );
+
+    connectNodeController.addListener(() {
+      if(selectedNode != null) {
+        selectedNode!.connectNode = connectNodeController.text.isEmpty ? null : connectNodeController.text;
+        debugPrint(selectedNode!.connectNode);
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(title: Text("Map")),
       body: Center(
@@ -60,7 +82,10 @@ class MapEditWidgetState extends State<MapEditWidget> {
                   items: MapNode.allMaps().map(
                     (e) => DropdownMenuItem(value: e, child: Text(e))
                   ).toList(),
-                  onChanged: (value) => setState(() => mapName = value!),
+                  onChanged: (value) => setState(() {
+                    mapName = value!;
+                    selectedNode = null;
+                  }),
                   value: mapName,
                 ),
               ),
@@ -120,6 +145,38 @@ class MapEditWidgetState extends State<MapEditWidget> {
                   },
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Connected Map"),
+                    ),
+                    Flexible(
+                      child: TextField(
+                        controller: connectMapController,
+                      )
+                    )
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Connected Node"),
+                    ),
+                    Flexible(
+                      child: TextField(
+                        controller: connectNodeController,
+                      )
+                    )
+                  ],
+                ),
+              ),              
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
