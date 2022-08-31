@@ -17,14 +17,43 @@ class MapNavigateWidget extends StatefulWidget {
 
 }
 
-class MapNavigateWidgetState extends State<MapNavigateWidget> {
+class MapNavigateWidgetState extends State<MapNavigateWidget>
+  with SingleTickerProviderStateMixin {
 
   String target;
   String? location;
   final nodes = ValueNotifier<List<MapNode>>([]);
   var allLocations = <String>{};
 
+  late AnimationController _animation;
+
   MapNavigateWidgetState(this.target);
+
+  @override
+  void initState() {
+    super.initState();
+    _animation = AnimationController(vsync: this) ..duration=Duration(seconds: 2) ..addStatusListener((status) {
+      if(status == AnimationStatus.completed) {
+        Future.delayed(Duration(seconds: 1), () {
+          _animation.forward(from: 0);
+        });
+      }
+    });
+  }
+
+  @override void dispose() {
+    _animation.dispose();
+    super.dispose();
+  }
+
+  void _startAnimation() {
+    _animation.stop();
+    _animation.reset();
+    _animation.forward(from: 0);
+    // _animation.repeat(
+    //   period: Duration(seconds: 2),
+    // );
+  }
 
   Future<List<List<MapNode>>?> buildPath() async {
 
@@ -59,7 +88,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
   @override
   Widget build(BuildContext context) {
-
+    _startAnimation();
     return Scaffold(
       appBar: AppBar(
         title: Text("Navigate to $target"),
@@ -99,7 +128,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: CustomPaint(
-                      foregroundPainter: MapNavigatePainter(path),
+                      foregroundPainter: MapNavigatePainter(path, _animation),
                       child: Image.asset("assets/maps/${path.first.map}.png"),
                     ),
                 );
@@ -115,7 +144,9 @@ class MapNavigateWidgetState extends State<MapNavigateWidget> {
 
 class MapNavigatePainter extends CustomPainter {
 
-  MapNavigatePainter(this.path);
+  final Animation<double> _animation;
+
+  MapNavigatePainter(this.path, this._animation) : super(repaint: _animation);
 
   List<MapNode>? path;
   Size? prevSize;
@@ -124,51 +155,21 @@ class MapNavigatePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     prevSize = size;
 
-
-//draw all nodes
-    // for (var i = 0; i < nodes.length; i++) {
-    //   var n = nodes[i];
-
-    //   for (var sIndex in n.siblings) {
-    //     if(sIndex > i) {
-    //       canvas.drawPoints(
-    //         PointMode.polygon,
-    //         [
-    //           scale(n.location, size),
-    //           scale(nodes[sIndex].location, size)
-    //         ],
-    //         Paint()
-    //           ..color = Colors.green
-    //           ..strokeWidth = 4
-    //           ..strokeCap = StrokeCap.round
-    //       );
-    //     }
-    //   }
-    //   canvas.drawCircle(scale(n.location, size), 3, Paint());
-    // }
-
-    //end = nodes.cast<MapNode?>().firstWhere((element) => element!.names.any((name)  => name.contains("208")), orElse: () => null);
-
+    var p = Path();
     if(path != null)
     {
-      canvas.drawPoints(PointMode.polygon, path!.map((e) => scale(e.location, size)).toList(), Paint() ..color=Colors.blue.shade400 ..strokeWidth=4 ..strokeCap=StrokeCap.round);
+      p.addPolygon(path!.map((e) => scale(e.location, size)).toList(), false);
+
+      var animated = createAnimatedPath(p, _animation.value);
+
+      canvas.drawPath(animated, Paint() ..color=Colors.blue.shade400 ..strokeWidth=4 ..strokeCap=StrokeCap.round ..style=PaintingStyle.stroke);
+      
       var start = path!.first;
       var end = path!.last;
 
       canvas.drawCircle(scale(start.location, size), 6, Paint() ..color=Colors.green ..strokeWidth=4 ..style=PaintingStyle.stroke);
       canvas.drawCircle(scale(end.location, size), 6, Paint() ..color=Colors.red ..strokeWidth=4 ..style=PaintingStyle.stroke);
     }
-    
-    // int s = 0;
-    // int f = 13;
-    // if(nodes.isNotEmpty && nodes.length > s && nodes.length > f)
-    // {
-    //   var path = nodes[s].path(nodes, nodes[f]);
-    //   if(path != null)
-    //   {
-    //     canvas.drawPoints(PointMode.polygon, path.map((e) => scale(e.location, size)).toList(), Paint() ..color=Colors.red ..strokeWidth=8 ..strokeCap=StrokeCap.round);
-    //   }
-    // }
   }
 
   Offset scale(Offset offset, Size size) => Offset(offset.dx * size.width, offset.dy * size.height);
@@ -176,6 +177,49 @@ class MapNavigatePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return false;
+  }
+
+  //https://stackoverflow.com/a/54697903/14645624
+  Path createAnimatedPath(Path originalPath, double animationPercent) {
+    // ComputeMetrics can only be iterated once!
+    final totalLength = originalPath
+        .computeMetrics()
+        .fold(0.0, (double prev, PathMetric metric) => prev + metric.length);
+
+    final currentLength = totalLength * animationPercent;
+
+    return extractPathUntilLength(originalPath, currentLength);
+  }  
+
+  Path extractPathUntilLength(Path originalPath, double length) {
+    var currentLength = 0.0;
+
+    final path = new Path();
+
+    var metricsIterator = originalPath.computeMetrics().iterator;
+
+    while (metricsIterator.moveNext()) {
+      var metric = metricsIterator.current;
+
+      var nextLength = currentLength + metric.length;
+
+      final isLastSegment = nextLength > length;
+      if (isLastSegment) {
+        final remainingLength = length - currentLength;
+        final pathSegment = metric.extractPath(0.0, remainingLength);
+
+        path.addPath(pathSegment, Offset.zero);
+        break;
+      } else {
+        // There might be a more efficient way of extracting an entire path
+        final pathSegment = metric.extractPath(0.0, metric.length);
+        path.addPath(pathSegment, Offset.zero);
+      }
+
+      currentLength = nextLength;
+    }
+
+    return path;
   }
 
 }
