@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../Data/session.dart';
+import 'map_navigate_widget.dart';
 
 class SessionDetailsWidget extends StatefulWidget {
   final Session _session;
@@ -139,10 +140,31 @@ class SessionDetailsWidgetState extends State {
   Widget _locationWidget() {
     return Row(children: [
       Expanded(
-        child: Column( children: [
-          Text("Location", style: Theme.of(context).textTheme.titleLarge),
-          Text(_session.room?.name ?? "", style: Theme.of(context).textTheme.bodyMedium)
-        ],)
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Opacity(
+              opacity: 0,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.map),
+              ),
+            ),
+            Column( children: [
+              Text("Location", style: Theme.of(context).textTheme.titleLarge),
+              Text(_session.room?.name ?? "", style: Theme.of(context).textTheme.bodyMedium)
+            ],),
+            IconButton(
+              onPressed: (){
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.room!.name!))
+                );
+              },
+              icon: Icon(Icons.map)
+            )
+          ],
+        )
       ),
       Expanded(
         child: Column( children: [
