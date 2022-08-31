@@ -116,7 +116,19 @@ class SessionDetailsWidgetState extends State {
   }  
 
   Widget _titleWidget() {
-    return Text(_session.title!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24));
+    return Row(
+      children: [
+        Expanded(child: Text(_session.title!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24))),
+        IconButton(
+          onPressed: (){
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.room!.name!))
+            );
+          },
+          icon: Icon(Icons.map)
+        )        
+      ],
+    );
   }
 
   Widget _timeWidget()
@@ -144,25 +156,10 @@ class SessionDetailsWidgetState extends State {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Opacity(
-              opacity: 0,
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(Icons.map),
-              ),
-            ),
             Column( children: [
               Text("Location", style: Theme.of(context).textTheme.titleLarge),
               Text(_session.room?.name ?? "", style: Theme.of(context).textTheme.bodyMedium)
-            ],),
-            IconButton(
-              onPressed: (){
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.room!.name!))
-                );
-              },
-              icon: Icon(Icons.map)
-            )
+            ],)
           ],
         )
       ),
