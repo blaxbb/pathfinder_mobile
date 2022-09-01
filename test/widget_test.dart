@@ -18,4 +18,5 @@ void main() {
     await tester.pumpWidget(const MyApp());
 
     expect(true, true);
+  });
 }
