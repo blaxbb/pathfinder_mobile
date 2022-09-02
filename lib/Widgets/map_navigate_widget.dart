@@ -129,7 +129,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                   padding: const EdgeInsets.all(16.0),
                   child: CustomPaint(
                       foregroundPainter: MapNavigatePainter(path, _animation),
-                      child: Image.asset("assets/maps/${path.first.map}.png"),
+                      child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
                     ),
                 );
               }).toList()) ?? []
