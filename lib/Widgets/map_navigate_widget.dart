@@ -127,10 +127,14 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
               ...(snapshot.data?.map((path) {
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: CustomPaint(
-                      foregroundPainter: MapNavigatePainter(path, _animation),
-                      child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
-                    ),
+                  child: InteractiveViewer(
+                    minScale: .1,
+                    maxScale: 4,
+                    child: CustomPaint(
+                        foregroundPainter: MapNavigatePainter(path, _animation),
+                        child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
+                      ),
+                  ),
                 );
               }).toList()) ?? []
             ],
