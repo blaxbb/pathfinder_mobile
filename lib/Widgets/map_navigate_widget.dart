@@ -132,7 +132,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                     maxScale: 4,
                     child: Center(
                       child: Container(
-                        constraints: const BoxConstraints(maxWidth: 500),
+                        constraints: BoxConstraints(maxHeight: (MediaQuery.of(context).size.height * .6)),
                         child: CustomPaint(
                             foregroundPainter: MapNavigatePainter(path, _animation),
                             child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
