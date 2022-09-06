@@ -130,10 +130,15 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                   child: InteractiveViewer(
                     minScale: .1,
                     maxScale: 4,
-                    child: CustomPaint(
-                        foregroundPainter: MapNavigatePainter(path, _animation),
-                        child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
+                    child: Center(
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 500),
+                        child: CustomPaint(
+                            foregroundPainter: MapNavigatePainter(path, _animation),
+                            child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
+                          ),
                       ),
+                    ),
                   ),
                 );
               }).toList()) ?? []
