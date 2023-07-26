@@ -39,6 +39,8 @@ dependencies:
   url_launcher: ^6.1.5  
   shared_preferences: ^2.0.15
   fuzzywuzzy: ^0.2.0
+  http: ^0.13.5
+  timezone: ^0.9.2
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parse;
+
 import 'package:pathfinder_mobile/Widgets/session_category_widget.dart';
 import 'package:pathfinder_mobile/Widgets/session_index_widget.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +14,10 @@ import 'Widgets/map_navigate_widget.dart';
 import 'Widgets/session_favorites_widget.dart';
 import 'Widgets/map_edit_widget.dart';
 
+import 'package:timezone/data/latest.dart' as tz;
+
 void main() {
+  tz.initializeTimeZones();
   runApp(const MyApp());
 }
 
@@ -57,20 +63,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+  Future<List<Session>> readWeb() async {
+    //final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${filterDate.toString().padLeft(2, '0')}.txt'));
+    final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-08.txt'));
+    if(response.statusCode >= 200 && response.statusCode < 300) {
+      final String body = response.body;
+      var doc = parse.parse(response.body);
+      var items = doc.querySelectorAll("body > table > tbody > .agenda-item");
+      var web = List<Session>.from(items.map((e) => Session.fromHtml(e)));
+      return web;
+    }
 
-  Future<List<Session>> readJson() async {
-    final String response = await rootBundle.loadString('assets/sessions.json');
-    final Iterable data = await jsonDecode(response);
-    return List<Session>.from(data.map((e) => Session.fromJson(e)));
-  }
+    return [];
+  }  
 
-  var all = readJson();
+  var all = readWeb();
 
     return Scaffold(
       appBar: AppBar(
@@ -148,15 +155,15 @@ class _MyHomePageState extends State<MyHomePage> {
               child: ListView(
                 children: [
                   SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${dt.day}th 12:30PM)",),
-                  SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42130 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Featured Speakers",),
+                  SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Keynote' && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Keynotes",),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42131 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Frontiers",)
+                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Frontiers' && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Frontiers",)
                         ),
                       Expanded(
-                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.track!.id == 42137 && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Production Sessions",),
+                        child: SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Production Session' && element.timeSlot!.startTime!.eventTime!.day == dt.day).toList(), title: "Production Sessions",),
                       ),
                     ]
                   )

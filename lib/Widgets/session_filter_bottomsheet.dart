@@ -28,10 +28,9 @@ class SessionFilterBottomsheetState extends State {
   @override
   Widget build(BuildContext context) {
 
-    var regs = all.expand((s) => s.registrationLevels()).toSet();
-    var tracks = all.map((s) => s.track?.title).where((element) => element != null).cast<String>().toSet();
-    var keywords = all.expand((s) => s.keywords()).toSet();
-    var areas = all.expand((s) => s.interestAreas()).toSet();
+    var regs = all.expand((s) => s.registrationLevels().where((e) => e != null).toSet().map((e) => e.name)).toSet();
+    var keywords = all.expand((s) => s.keywords().where((e) => e != null).toSet().map((e) => e.name)).toSet();
+    var areas = all.expand((s) => s.interestAreas().where((e) => e != null).toSet().map((e) => e.name)).toSet();
 
     controller.text = filter.search ?? "";
 
@@ -54,10 +53,9 @@ class SessionFilterBottomsheetState extends State {
             )
           ),
         ),
-        ...filterGroup("Regitration Level", regs, filter.registrationFilters),
-        ...filterGroup("Track", tracks, filter.trackFilters),
-        ...filterGroup("Keywords", keywords, filter.keywordFilters),
-        ...filterGroup("Interest Areas", areas, filter.areaFilters)
+        ...filterGroup("Registration Level", regs.cast<String>(), filter.registrationFilters),
+        ...filterGroup("Keywords", keywords.cast<String>(), filter.keywordFilters),
+        ...filterGroup("Interest Areas", areas.cast<String>(), filter.areaFilters)
       ],
     );
   }

@@ -1,16 +1,25 @@
+import 'package:html/dom.dart' as html;
+
 import 'package:intl/intl.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 class Session {
   String? links;
   int? sessionTypeId;
   String? description;
   String? title;
-  int? id;
+  String? id;
   bool? enabled;
-  Track? track;
-  List<PropertyValues>? propertyValues;
   TimeSlot? timeSlot;
-  Room? room;
+
+  Map<String, List<Tag>>? Tags = {};
+  String? EventType;
+  String? Location;
+
+  List<Tag> registrationLevels() => Tags?["registration-category"] ?? [];
+  List<Tag> keywords() => Tags?["keyword"] ?? [];
+  List<Tag> interestAreas() => Tags?["interest-area"] ?? [];
+  List<Tag> recordingStatus() => Tags?["recording"] ?? [];
 
   Session(
       {this.links,
@@ -19,43 +28,54 @@ class Session {
       this.title,
       this.id,
       this.enabled,
-      this.track,
-      this.propertyValues,
       this.timeSlot,
-      this.room});
+      this.EventType,
+      this.Location,
+      this.Tags});
 
-  String format() => stringProp(99882);
-  List<String> keywords() => listProp(99825);
-  List<String> interestAreas() => listProp(99880);
-  List<String> registrationLevels() => listProp(99881);
-
-  PropertyValues? prop(int id) => propertyValues?.cast<PropertyValues?>().firstWhere((element) => element?.propertyMetadataId == id, orElse: () => null);
-
-  String stringProp(int id) {
-    return prop(id)?.value ?? "";
-  }
-  List<String> listProp(int id) {
-    return prop(id)?.value?.split(",") ?? List.generate((0), (index) => "");
-  }
-
-  Session.fromJson(Map<String, dynamic> json) {
-    links = json['Links'];
-    sessionTypeId = json['SessionTypeId'];
-    description = json['Description'];
-    title = json['Title'];
-    id = json['Id'];
-    enabled = json['Enabled'];
-    track = json['Track'] != null ? Track.fromJson(json['Track']) : null;
-    if (json['PropertyValues'] != null) {
-      propertyValues = <PropertyValues>[];
-      json['PropertyValues'].forEach((v) {
-        propertyValues!.add(PropertyValues.fromJson(v));
-      });
+  Session.fromHtml(html.Element element) {
+    title = element.querySelector(".agenda-item a")?.text ?? "";
+    links = element.querySelector(".agenda-item a")?.attributes['href'] ?? "";
+    id = element.attributes['psid'];
+    if (element.attributes.containsKey('style') &&
+        element.attributes['style']!.contains('display: none')) {
+      enabled = false;
+    } else {
+      enabled = true;
     }
-    timeSlot = json['TimeSlot'] != null
-        ? TimeSlot.fromJson(json['TimeSlot'])
-        : null;
-    room = json['Room'] != null ? Room.fromJson(json['Room']) : null;
+
+    var start = element.querySelector(".start-time")?.attributes['utc_time'];
+    var end = element.querySelector(".end-time")?.attributes['utc_time'];
+    if (start != null && end != null) {
+      timeSlot = TimeSlot(
+          startTime: StartTime.fromUtc(DateTime.parse(start)),
+          endTime: StartTime.fromUtc(DateTime.parse(end))
+      );
+    }
+    else {
+      timeSlot = TimeSlot();
+    }
+
+    var tagGroups = element.querySelectorAll('.tag-group-list');
+    for(var group in tagGroups) {
+
+      var groupName = group.classes.first;
+
+      var tags = <Tag>[];
+      var tagElements = group.querySelectorAll('.program-track');
+
+      for(var tagElement in tagElements) {
+        var tag = Tag.FromElement(tagElement);
+        tags.add(tag);
+      }
+
+
+      Tags![groupName] = tags;
+    }
+
+    Location = element.querySelector(".presentation-location a")?.innerHtml;
+    EventType = element.querySelector(".event-type-name")?.innerHtml;
+
   }
 
   Map<String, dynamic> toJson() {
@@ -66,108 +86,28 @@ class Session {
     data['Title'] = title;
     data['Id'] = id;
     data['Enabled'] = enabled;
-    if (track != null) {
-      data['Track'] = track!.toJson();
-    }
-    if (propertyValues != null) {
-      data['PropertyValues'] =
-          propertyValues!.map((v) => v.toJson()).toList();
-    }
-    if (timeSlot != null) {
-      data['TimeSlot'] = timeSlot!.toJson();
-    }
-    if (room != null) {
-      data['Room'] = room!.toJson();
-    }
     return data;
   }
 }
 
-class Track {
-  int? id;
-  String? title;
-  String? description;
-  int? numberOfSessions;
+class Tag {
+  String? id;
+  String? name;
 
-  Track({this.id, this.title, this.description, this.numberOfSessions});
+  Tag({this.id, this.name});
 
-  Track.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
-    title = json['Title'];
-    description = json['Description'];
-    numberOfSessions = json['NumberOfSessions'];
+  Tag.FromElement(html.Element element) {
+    this.id = element.classes.last;
+    this.name = element.innerHtml;
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
-    data['Title'] = title;
-    data['Description'] = description;
-    data['NumberOfSessions'] = numberOfSessions;
-    return data;
-  }
-}
-
-class PropertyValues {
-  int? id;
-  String? value;
-  int? propertyMetadataId;
-  int? sessionId;
-
-  PropertyValues(
-      {this.id, this.value, this.propertyMetadataId, this.sessionId});
-
-  PropertyValues.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
-    value = json['Value'];
-    propertyMetadataId = json['PropertyMetadataId'];
-    sessionId = json['SessionId'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
-    data['Value'] = value;
-    data['PropertyMetadataId'] = propertyMetadataId;
-    data['SessionId'] = sessionId;
-    return data;
-  }
 }
 
 class TimeSlot {
-  int? id;
   StartTime? startTime;
   StartTime? endTime;
-  String? label;
-  String? type;
 
-  TimeSlot({this.id, this.startTime, this.endTime, this.label, this.type});
-
-  TimeSlot.fromJson(Map<String, dynamic> json) {
-    id = json['Id'];
-    startTime = json['StartTime'] != null
-        ? StartTime.fromJson(json['StartTime'])
-        : null;
-    endTime = json['EndTime'] != null
-        ? StartTime.fromJson(json['EndTime'])
-        : null;
-    label = json['Label'];
-    type = json['Type'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['Id'] = id;
-    if (startTime != null) {
-      data['StartTime'] = startTime!.toJson();
-    }
-    if (endTime != null) {
-      data['EndTime'] = endTime!.toJson();
-    }
-    data['Label'] = label;
-    data['Type'] = type;
-    return data;
-  }
+  TimeSlot({this.startTime, this.endTime});
 }
 
 class StartTime {
@@ -180,6 +120,11 @@ class StartTime {
     uTC = DateTime.parse(json['UTC']);
     eventTime = DateTime.parse(json['EventTime']);
   }
+  StartTime.fromUtc(DateTime utc) {
+    uTC = utc;
+    final timeZone = tz.getLocation('America/Los_Angeles');
+    eventTime = tz.TZDateTime.from(utc, timeZone);
+  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
@@ -188,7 +133,7 @@ class StartTime {
     return data;
   }
 
-  String simpleTime() => DateFormat(DateFormat.HOUR_MINUTE).format(eventTime!.subtract(const Duration(hours: 7)));
+  String simpleTime() => DateFormat(DateFormat.HOUR_MINUTE).format(eventTime!);
 }
 
 class Room {

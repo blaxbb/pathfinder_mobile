@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parse;
 
 import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 import 'package:intl/intl.dart';
@@ -20,7 +23,7 @@ class SessionIndexWidget extends StatefulWidget {
 class SessionIndexWidgetState extends State {
 
   var displayFilter = false;
-  var filterDate = 8;
+  var filterDate = 6;
   List<Session> all = List.empty();
   var regFilters = <String>{};
   var filter = Filter();
@@ -28,11 +31,19 @@ class SessionIndexWidgetState extends State {
 
   String title() => "Session List";
 
-  Future<List<Session>> readJson() async {
-    final String response = await rootBundle.loadString('assets/sessions.json');
-    final Iterable data = await jsonDecode(response);
-    all = List<Session>.from(data.map((e) => Session.fromJson(e)));
-    return all;
+  Future<List<Session>> readWeb() async {
+    log("http");
+    final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${filterDate.toString().padLeft(2, '0')}.txt'));
+    if(response.statusCode >= 200 && response.statusCode < 300) {
+      final String body = response.body;
+      var doc = parse.parse(response.body);
+      var items = doc.querySelectorAll("body > table > tbody > .agenda-item");
+      var web = List<Session>.from(items.map((e) => Session.fromHtml(e)));
+      all = web;
+      return web;
+    }
+
+    return [];
   }
 
   @override
@@ -62,7 +73,7 @@ class SessionIndexWidgetState extends State {
         ],
       ),
       body: FutureBuilder<List<Session>>(
-        future: readJson(),
+        future: readWeb(),
         builder: (context, snapshot) {
           if(!snapshot.hasData) {
             return const CircularProgressIndicator();
@@ -72,8 +83,8 @@ class SessionIndexWidgetState extends State {
             return const Text("Error loading session info");
           }
 
-          final start = DateTime(2022, 8, 8, 7);
-          final end = DateTime(2022, 8, 11, 7);
+          final start = DateTime(2023, 8, 6, 7);
+          final end = DateTime(2023, 8, 10, 7);
 
           return Column(
             children: [
@@ -139,6 +150,8 @@ class SessionIndexWidgetState extends State {
         onPressed: () {
           setState(() {
             filterDate = day.day;
+            all = [];
+            // readWeb();
           });
         },
         style: TextButton.styleFrom(
@@ -180,9 +193,9 @@ class SessionIndexList extends StatelessWidget{
     }
 
     var ret = _all
-      .where((element) => element.timeSlot!.startTime!.eventTime!.add(const Duration(hours: -7)).day == filterDate)
+      .where((element) => element.enabled ?? false)
+      .where((element) => element.timeSlot!.startTime!.eventTime!.day == filterDate)
       .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().contains(f)))
-      .where((element) => filter.trackFilters.isEmpty || filter.trackFilters.any((f) => element.track?.title == f))
       .where((element) => filter.keywordFilters.isEmpty || filter.keywordFilters.any((f) => element.keywords().contains(f)))
       .where((element) => filter.areaFilters.isEmpty || filter.areaFilters.any((f) => element.interestAreas().contains(f)))
       .toList();

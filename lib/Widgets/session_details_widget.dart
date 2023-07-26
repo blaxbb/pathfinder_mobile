@@ -77,7 +77,7 @@ class SessionDetailsWidgetState extends State {
                   style: {
                     "div": Style(fontSize: const FontSize(16))
                   },
-                  data: _session.description,
+                  data: _session.description ?? '',
                   onLinkTap: (url, context, attributes, element) => launchUrl(Uri.parse(url ?? "")),
                 ),
               )
@@ -122,7 +122,7 @@ class SessionDetailsWidgetState extends State {
         IconButton(
           onPressed: (){
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.room!.name!))
+                MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.Location!))
             );
           },
           icon: Icon(Icons.map)
@@ -158,17 +158,17 @@ class SessionDetailsWidgetState extends State {
           children: [
             Column( children: [
               Text("Location", style: Theme.of(context).textTheme.titleLarge),
-              Text(_session.room?.name ?? "", style: Theme.of(context).textTheme.bodyMedium)
+              Text(_session.Location ?? "", style: Theme.of(context).textTheme.bodyMedium)
             ],)
           ],
         )
       ),
-      Expanded(
-        child: Column( children: [
-          Text("Format", style: Theme.of(context).textTheme.titleLarge),
-          Text(_session.format(), style: Theme.of(context).textTheme.bodyMedium)
-        ],)
-      )
+      // Expanded(
+      //   child: Column( children: [
+      //     Text("Format", style: Theme.of(context).textTheme.titleLarge),
+      //     Text(_session.format(), style: Theme.of(context).textTheme.bodyMedium)
+      //   ],)
+      // )
     ]);
   }
 
@@ -176,7 +176,7 @@ class SessionDetailsWidgetState extends State {
   Widget interestAreasWidget() => listPropWidget("Interest Areas", _session.interestAreas());
   Widget registrationLevelsWidget() => listPropWidget("Registration Level", _session.registrationLevels());
 
-  Widget listPropWidget(String title, List<String> values) {
+  Widget listPropWidget(String title, List<Tag> values) {
     if(values.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -187,7 +187,7 @@ class SessionDetailsWidgetState extends State {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
           Text(title, style: Theme.of(context).textTheme.titleLarge,),
-          Text(values.join(" - "), style: Theme.of(context).textTheme.bodyMedium)
+          Text(values.map((e) => e.name).join(" - "), style: Theme.of(context).textTheme.bodyMedium)
           ]),
       );
   }

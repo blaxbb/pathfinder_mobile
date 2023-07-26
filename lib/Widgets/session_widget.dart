@@ -51,14 +51,14 @@ class _SessionWidgetState extends State<SessionWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(_session.title ?? "", style: const TextStyle(fontSize: 18),),
-                  _session.room == null
+                  _session.Location == null
                       ? const SizedBox.shrink()
-                      : Text(_session.room!.name!),
+                      : Text(_session.Location!),
                   Row(
                     children: [
                       _session.timeSlot?.startTime?.eventTime == null
                           ? const SizedBox.shrink()
-                          : Expanded(child: Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.uTC!.subtract(const Duration(hours: 7)))} ${_session.timeSlot!.startTime!.simpleTime()}")),
+                          : Expanded(child: Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.eventTime!)} ${_session.timeSlot!.startTime!.simpleTime()}")),
                       const SizedBox(width: 8),
                       _session.timeSlot?.endTime?.eventTime == null
                           ? const SizedBox.shrink()
