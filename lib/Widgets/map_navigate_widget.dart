@@ -170,7 +170,6 @@ class MapNavigatePainter extends CustomPainter {
       p.addPolygon(path!.map((e) => scale(e.location, size)).toList(), false);
 
       var animated = createAnimatedPath(p, _animation.value);
-
       canvas.drawPath(animated, Paint() ..color=Colors.blue.shade400 ..strokeWidth=5 ..strokeCap=StrokeCap.round ..style=PaintingStyle.stroke);
       
       var start = path!.first;

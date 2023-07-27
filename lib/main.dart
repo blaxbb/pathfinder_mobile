@@ -18,7 +18,7 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/standalone.dart' as tzs;
 
 void main() {
-  tz.initializeTimeZones();
+  
   runApp(const MyApp());
 }
 
@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    tz.initializeTimeZones();
     return MaterialApp(
       title: 'SIGGRAPH 2023',
       theme: ThemeData(
