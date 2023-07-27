@@ -73,7 +73,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
     allLocations = tmp.toSet();
 
     if(location == null && allLocations.isNotEmpty) {
-      location = "West Building, West Entrance";
+      location = "Pathfinders";
     }
 
     var path = MapNode.buildPath(nodes.value, location ?? "", target);
@@ -135,7 +135,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                         constraints: BoxConstraints(maxHeight: (MediaQuery.of(context).size.height * .6)),
                         child: CustomPaint(
                             foregroundPainter: MapNavigatePainter(path, _animation),
-                            child: Image.asset("assets/maps/${path.first.map}.png", fit: BoxFit.fill),
+                            child: Image.asset("assets/maps/${path.first.map}.jpg", fit: BoxFit.fill),
                           ),
                       ),
                     ),
@@ -171,15 +171,13 @@ class MapNavigatePainter extends CustomPainter {
 
       var animated = createAnimatedPath(p, _animation.value);
 
-      canvas.drawPath(animated, Paint() ..color=Colors.blue.shade400 ..strokeWidth=4 ..strokeCap=StrokeCap.round ..style=PaintingStyle.stroke);
+      canvas.drawPath(animated, Paint() ..color=Colors.blue.shade400 ..strokeWidth=5 ..strokeCap=StrokeCap.round ..style=PaintingStyle.stroke);
       
       var start = path!.first;
       var end = path!.last;
 
-      canvas.drawCircle(scale(start.location, size), 4, Paint() ..color=Colors.green ..strokeWidth=3 ..style=PaintingStyle.stroke);
-      if(_animation.value == 1) {
-        canvas.drawCircle(scale(end.location, size), 4, Paint() ..color=Colors.red ..strokeWidth=3 ..style=PaintingStyle.stroke);
-      }
+      canvas.drawCircle(scale(start.location, size), 12, Paint() ..color=Colors.blue ..strokeWidth=5 ..style=PaintingStyle.stroke);
+      canvas.drawCircle(scale(end.location, size), 12, Paint() ..color=Colors.red ..strokeWidth=5 ..style=PaintingStyle.stroke);
     }
   }
 

@@ -22,11 +22,11 @@ class MapEditWidgetState extends State<MapEditWidget> {
   MapNode? selectedNode;
   List<MapNode>? nodes;
 
-  String mapName = "map_level_1";
+  String mapName = "map_level_1_2023";
   String? prevMap = null;
 
   Future<MapEditPainter?> loadMap(String map) async {
-    var mapImage = Image.asset("assets/maps/$map.png");
+    var mapImage = Image.asset("assets/maps/$map.jpg");
     var mapData = await rootBundle.loadString("assets/maps/$map.json");
 
     if(nodes == null || mapName != prevMap) {
@@ -46,7 +46,7 @@ class MapEditWidgetState extends State<MapEditWidget> {
 
   Widget build(BuildContext context) {
 
-    Image map = Image.asset("assets/maps/$mapName.png");
+    Image map = Image.asset("assets/maps/$mapName.jpg");
 
     var connectMapController = TextEditingController(
       text: selectedNode?.connectMap

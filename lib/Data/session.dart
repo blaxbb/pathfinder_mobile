@@ -1,4 +1,5 @@
 import 'package:html/dom.dart' as html;
+import 'package:html/parser.dart' as parser;
 
 import 'package:intl/intl.dart';
 import 'package:timezone/standalone.dart' as tz;
@@ -34,7 +35,7 @@ class Session {
       this.Tags});
 
   Session.fromHtml(html.Element element) {
-    title = element.querySelector(".agenda-item a")?.text ?? "";
+    title = parser.parseFragment(element.querySelector(".agenda-item a")?.innerHtml ?? '').text ?? '';
     links = element.querySelector(".agenda-item a")?.attributes['href'] ?? "";
     id = element.attributes['psid'];
     if (element.attributes.containsKey('style') &&

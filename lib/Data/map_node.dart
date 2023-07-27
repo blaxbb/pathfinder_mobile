@@ -34,9 +34,8 @@ class MapNode {
 
   static List<String> allMaps() {
     return [
-      "map_level_1",
-      "map_level_2",
-      "map_level_3"
+      "map_level_1_2023",
+      "map_level_2_2023"
     ];
   }
 
@@ -76,6 +75,9 @@ class MapNode {
   }
 
   double _hScore(MapNode target) {
+    if(target.map != map) {
+      return 1;
+    }
     return (target.location.dx - location.dx).abs() + (target.location.dy - location.dy).abs();
   }
 
