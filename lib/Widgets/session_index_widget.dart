@@ -182,8 +182,8 @@ class SessionIndexList extends StatelessWidget{
     if(filter.search?.isNotEmpty ?? false)
     {
       var fuzz = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.title!,);
-      var fuzzBody = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.description!);
-      fuzz.addAll(fuzzBody);
+      // var fuzzBody = extractTop<Session>(query: filter.search!, choices: _all, limit: 20, getter: (obj) => obj.description!);
+      // fuzz.addAll(fuzzBody);
 
       var duplicate = <int>{};
       fuzz.retainWhere((element) => duplicate.add(element.index));
@@ -195,9 +195,9 @@ class SessionIndexList extends StatelessWidget{
     var ret = _all
       .where((element) => element.enabled ?? false)
       .where((element) => element.timeSlot!.startTime!.eventTime!.day == filterDate)
-      .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().contains(f)))
-      .where((element) => filter.keywordFilters.isEmpty || filter.keywordFilters.any((f) => element.keywords().contains(f)))
-      .where((element) => filter.areaFilters.isEmpty || filter.areaFilters.any((f) => element.interestAreas().contains(f)))
+      .where((element) => filter.registrationFilters.isEmpty || filter.registrationFilters.any((f) => element.registrationLevels().any((element) => element.name == f)))
+      .where((element) => filter.keywordFilters.isEmpty || filter.keywordFilters.any((f) => element.keywords().any((element) => element.name == f)))
+      .where((element) => filter.areaFilters.isEmpty || filter.areaFilters.any((f) => element.interestAreas().any((element) => element.name == f)))
       .toList();
     return ret;
   }
