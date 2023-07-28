@@ -24,7 +24,7 @@ class SessionCategoryWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           title == null ? const SizedBox.shrink() : Text(title!, style: const TextStyle(fontSize: 24),),
-          ...sessions.map((s) => SessionWidget(s)).toList()
+          ...sessions.isNotEmpty ? [...sessions.map((s) => SessionWidget(s)).toList()] : [const Padding(padding: EdgeInsets.all(16), child: Text("No events found"))]
         ]
       ),
     );

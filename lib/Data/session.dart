@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:html/dom.dart' as html;
 import 'package:html/parser.dart' as parser;
 
@@ -35,7 +37,7 @@ class Session {
       this.Tags});
 
   Session.fromHtml(html.Element element) {
-    title = parser.parseFragment(element.querySelector(".agenda-item a")?.innerHtml ?? '').text ?? '';
+    title = clean(element.querySelector(".agenda-item a")?.innerHtml ?? '');
     links = element.querySelector(".agenda-item a")?.attributes['href'] ?? "";
     id = element.attributes['psid'];
     if (element.attributes.containsKey('style') &&
@@ -79,6 +81,12 @@ class Session {
 
   }
 
+  static String clean(String s) {
+    var ret = parser.parseFragment(s).text ?? '';
+    ret = utf8.decode(ret.codeUnits);
+    return ret.replaceAll("Â", "");
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['Links'] = links;
@@ -99,7 +107,7 @@ class Tag {
 
   Tag.FromElement(html.Element element) {
     this.id = element.classes.last;
-    this.name = element.innerHtml;
+    this.name = Session.clean(element.innerHtml);
   }
 
 }
@@ -109,6 +117,37 @@ class TimeSlot {
   StartTime? endTime;
 
   TimeSlot({this.startTime, this.endTime});
+
+  Duration duration() {
+    if(startTime?.eventTime == null || endTime?.eventTime == null)
+    {
+      return Duration.zero;
+    }
+
+    var delta = endTime!.eventTime!.difference(startTime!.eventTime!);
+    return delta;
+  }
+
+  String durationText() {
+    if(startTime?.eventTime == null || endTime?.eventTime == null)
+    {
+      return "Unknown duration";
+    }
+
+    var delta = endTime!.eventTime!.difference(startTime!.eventTime!);
+    var hours = delta.inHours;
+    var minutes = delta.inMinutes;
+    if(hours > 0)
+    {
+      if(minutes % 60 == 0) {
+        return "$hours hour${hours == 1 ? "" : "s"} long";  
+      }
+      return "$hours hour${hours == 1 ? "" : "s"} ${minutes % 60} minutes long";
+    }
+    else {
+      return "$minutes minutes long";
+    }
+  }
 }
 
 class StartTime {

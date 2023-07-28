@@ -47,25 +47,33 @@ class _SessionWidgetState extends State<SessionWidget> {
             child: GestureDetector(
               onTap: () => {Navigator.push(context, MaterialPageRoute(builder: ((context) => SessionDetailsWidget(_session))))},
               behavior: HitTestBehavior.translucent,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(_session.title ?? "", style: const TextStyle(fontSize: 18),),
-                  _session.Location == null
-                      ? const SizedBox.shrink()
-                      : Text(_session.Location!),
-                  Row(
+                  _session.timeSlot?.startTime?.eventTime == null
+                    ? const SizedBox.shrink()
+                    : Padding(padding: const EdgeInsets.all(8), child: Text(_session.timeSlot!.startTime!.simpleTime(), style: const TextStyle(fontSize: 24))),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _session.timeSlot?.startTime?.eventTime == null
+                      Text(_session.title ?? "", style: const TextStyle(fontSize: 18),),
+                      _session.Location == null
                           ? const SizedBox.shrink()
-                          : Expanded(child: Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.eventTime!)} ${_session.timeSlot!.startTime!.simpleTime()}")),
-                      const SizedBox(width: 8),
-                      _session.timeSlot?.endTime?.eventTime == null
-                          ? const SizedBox.shrink()
-                          : Expanded(child: Text(_session.timeSlot!.endTime!.simpleTime())),
+                          : Text(_session.Location!),
+                      Row(
+                        children: [
+                          _session.timeSlot?.endTime?.eventTime == null || _session.timeSlot?.startTime?.eventTime == null
+                              ? const SizedBox.shrink()
+                              : Text(_session.timeSlot!.durationText()),                           
+                        ],
+                      )
                     ],
                   )
-                ],
+                  )
+                ]
               )
             )
           ),

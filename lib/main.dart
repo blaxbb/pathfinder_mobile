@@ -161,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${time!.day}th 12:30PM)",),
                   SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Keynote' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Keynotes",),
+                  SessionCategoryWidget(snapshot.data!.where((element) => element.timeSlot!.duration().inHours > 4 && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "All-Day",),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
