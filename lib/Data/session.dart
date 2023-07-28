@@ -78,6 +78,9 @@ class Session {
 
     Location = element.querySelector(".presentation-location a")?.innerHtml;
     EventType = element.querySelector(".event-type-name")?.innerHtml;
+    if(EventType == null || EventType == "") {
+      EventType = element.querySelector('.presentation-type span')?.innerHtml;
+    }
 
   }
 
