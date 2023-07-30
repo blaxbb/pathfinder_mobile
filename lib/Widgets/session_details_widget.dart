@@ -70,16 +70,16 @@ class SessionDetailsWidgetState extends State {
               )
 
             ),
-            Card(
+            const Card(
               child:Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: SelectableHtml(
-                  style: {
-                    "div": Style(fontSize: const FontSize(16))
-                  },
-                  data: _session.description ?? '',
-                  onLinkTap: (url, context, attributes, element) => launchUrl(Uri.parse(url ?? "")),
-                ),
+                // child: SelectableHtml(
+                //   style: {
+                //     "div": Style(fontSize: const FontSize(16))
+                //   },
+                //   data: _session.description ?? '',
+                //   onLinkTap: (url, context, attributes, element) => launchUrl(Uri.parse(url ?? "")),
+                // ),
               )
             )
           ],
