@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as parse;
+import 'package:intl/intl.dart';
 
 import 'package:pathfinder_mobile/Widgets/session_category_widget.dart';
 import 'package:pathfinder_mobile/Widgets/session_index_widget.dart';
@@ -60,20 +61,27 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   DateTime? time;
+  late Future<List<Session>> Items;
 
   Future<void> _pullRefresh() async {
       setState(() {});
   }
 
   @override
-  Widget build(BuildContext context) {
-    var dbg = DateTime.now().toUtc();
-    dbg = DateTime.utc(2023, 8, Random().nextInt(5) + 6, 12, 30);
-    final timeZone = tzs.getLocation('America/Los_Angeles');
-    time = tzs.TZDateTime.from(dbg, timeZone);
-
+  void initState() {
     Future<List<Session>> readWeb() async {
-      final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${time!.day.toString().padLeft(2, '0')}.txt'));
+      final timeZone = tzs.getLocation('America/Los_Angeles');
+
+      var currentTime = tzs.TZDateTime.now(timeZone);
+      var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 13), timeZone);
+      if(eventStartTime.isAfter(currentTime)) {
+        currentTime = eventStartTime;
+      }
+      
+      time = currentTime;
+
+      var uri = Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${time!.day.toString().padLeft(2, '0')}.txt');
+      final http.Response response = await http.get(uri);
       // final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-08.txt'));
       if(response.statusCode >= 200 && response.statusCode < 300) {
         final String body = response.body;
@@ -86,11 +94,18 @@ class _MyHomePageState extends State<MyHomePage> {
       return [];
     }  
 
-    var all = readWeb();
+    Items = readWeb();
+  }
+
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Featured Sessions"),
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.refresh))
+        ],
       ),
       drawer: Drawer(
         child: ListView(
@@ -140,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: FutureBuilder<List<Session>>(
-        future: all,
+        future: Items,
         builder: (context, snapshot) {
           if(snapshot.connectionState != ConnectionState.done)
           {
@@ -161,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onRefresh: _pullRefresh,
               child: ListView(
                 children: [
-                  SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Debug: Aug ${time!.day}th 12:30PM)",),
+                  SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Updated: ${DateFormat("MMM dd - hh:mm a").format(time!)})",),
                   SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Keynote' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Keynotes",),
                   ...(wideScreen ? [Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

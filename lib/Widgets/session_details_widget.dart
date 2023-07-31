@@ -3,6 +3,8 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' as parse;
 
 import '../Data/session.dart';
 import 'map_navigate_widget.dart';
@@ -17,9 +19,35 @@ class SessionDetailsWidget extends StatefulWidget {
 
 class SessionDetailsWidgetState extends State {
   final Session _session;
+  late Future<String> _description;
   bool _tapped = false;
 
   SessionDetailsWidgetState(this._session);
+
+@override
+  void initState() {
+    Future<String> GetDescription() async {
+      if(_session.description != null && _session.description!.isNotEmpty) {
+        return _session.description ?? '';
+      }
+
+      if(_session.Url?.isNotEmpty ?? false) {
+
+        var uri = Uri.parse("https://s2023.siggraph.org${_session.Url!}");
+        final http.Response response = await http.get(uri);
+        if(response.statusCode >= 200 && response.statusCode < 300)
+        {
+          var body = parse.parse(response.body);
+          return body.querySelector('.info-section .abstract')?.innerHtml ?? '';
+        }
+      }
+
+      return "";
+    }
+
+    _description = GetDescription();
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +98,25 @@ class SessionDetailsWidgetState extends State {
               )
 
             ),
-            const Card(
+            Card(
               child:Padding(
                 padding: const EdgeInsets.all(8.0),
+                child: 
+                  FutureBuilder(
+                    future: _description,
+                    builder: (context, snapshot) {
+                      if(snapshot.hasData) {
+                        return Html(
+                          data: snapshot.data ?? '',
+                          style: { "div": Style(fontSize: FontSize(16))},
+                          onLinkTap: (url, attributes, element) => launchUrl(Uri.parse(url ?? "")),
+                        );
+                      }
+                      
+                      return const SizedBox.shrink();
+                    },
+                  )
+                
                 // child: SelectableHtml(
                 //   style: {
                 //     "div": Style(fontSize: const FontSize(16))

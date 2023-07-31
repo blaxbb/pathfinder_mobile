@@ -18,6 +18,7 @@ class Session {
   Map<String, List<Tag>>? Tags = {};
   String? EventType;
   String? Location;
+  String? Url;
 
   List<Tag> registrationLevels() => Tags?["registration-category"] ?? [];
   List<Tag> keywords() => Tags?["keyword"] ?? [];
@@ -34,10 +35,12 @@ class Session {
       this.timeSlot,
       this.EventType,
       this.Location,
-      this.Tags});
+      this.Tags,
+      this.Url});
 
   Session.fromHtml(html.Element element) {
     title = clean(element.querySelector(".agenda-item a")?.innerHtml ?? '');
+    Url = element.querySelector(".agenda-item a")?.attributes['href'] ?? '';
     links = element.querySelector(".agenda-item a")?.attributes['href'] ?? "";
     id = element.attributes['psid'];
     if (element.attributes.containsKey('style') &&

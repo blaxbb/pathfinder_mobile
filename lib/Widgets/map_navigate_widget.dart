@@ -110,7 +110,6 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                 child: Row(
                   children: [
                     Text("Navigate From: "),
-                    SizedBox(width: 8,),
                     Expanded(
                       child: DropdownButton<String>(
                         value: location,
@@ -128,6 +127,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                 return Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: InteractiveViewer(
+                    panEnabled: false,
                     minScale: .1,
                     maxScale: 4,
                     child: Center(
