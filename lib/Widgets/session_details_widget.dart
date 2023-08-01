@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
+import 'package:pathfinder_mobile/Data/session_details.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
@@ -19,33 +20,14 @@ class SessionDetailsWidget extends StatefulWidget {
 
 class SessionDetailsWidgetState extends State {
   final Session _session;
-  late Future<String> _description;
+  late Future<SessionDetails?> _details;
   bool _tapped = false;
 
   SessionDetailsWidgetState(this._session);
 
 @override
   void initState() {
-    Future<String> GetDescription() async {
-      if(_session.description != null && _session.description!.isNotEmpty) {
-        return _session.description ?? '';
-      }
-
-      if(_session.Url?.isNotEmpty ?? false) {
-
-        var uri = Uri.parse("https://s2023.siggraph.org${_session.Url!}");
-        final http.Response response = await http.get(uri);
-        if(response.statusCode >= 200 && response.statusCode < 300)
-        {
-          var body = parse.parse(response.body);
-          return body.querySelector('.info-section .abstract')?.innerHtml ?? '';
-        }
-      }
-
-      return "";
-    }
-
-    _description = GetDescription();
+    _details = SessionDetails.Get(_session);
 
   }
 
@@ -79,7 +61,13 @@ class SessionDetailsWidgetState extends State {
                 child: Column(children: [
                   _timeWidget(),
                   const SizedBox(height: 8),
-                  _locationWidget(),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,                      
+                      children: [
+                        _locationWidget(),
+                        registrationLevelsWidget()
+                      ],
+                    ),
                 ]
                 ),
               ),
@@ -98,33 +86,57 @@ class SessionDetailsWidgetState extends State {
               )
 
             ),
-            Card(
-              child:Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: 
-                  FutureBuilder(
-                    future: _description,
-                    builder: (context, snapshot) {
-                      if(snapshot.hasData) {
-                        return Html(
-                          data: snapshot.data ?? '',
-                          style: { "div": Style(fontSize: FontSize(16))},
-                          onLinkTap: (url, attributes, element) => launchUrl(Uri.parse(url ?? "")),
-                        );
-                      }
-                      
-                      return const SizedBox.shrink();
-                    },
-                  )
+            FutureBuilder(
+              future: _details,
+              builder: (context, snapshot) {
+                if(snapshot.hasData && snapshot.data?.description != null) {
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Html(
+                            data: snapshot.data!.description,
+                            style: { "*": Style(fontSize: FontSize(16))},
+                            onLinkTap: (url, attributes, element) => launchUrl(Uri.parse(url ?? "")),
+                          ),
+                    )
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),            
+            FutureBuilder(
+              future: _details,
+              builder: (context, snapshot) {
+                if(snapshot.hasData && (snapshot.data?.presentations.length ?? 0) > 0) {
+                  return Card(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                      Padding(padding: const EdgeInsets.all(8), child: Text("Presentations", style: Theme.of(context).textTheme.titleLarge,)),
+                       ...snapshot.data!.presentations.map(
+                        (p) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Padding(padding: const EdgeInsets.all(8), child: Text(p.timeSlot!.startTime!.simpleTime(), style: Theme.of(context).textTheme.titleLarge,)),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(p.Title ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                                  p.speakers.isNotEmpty ? Text("Presenting: ${p.speakers.join(", ")}") : SizedBox.shrink(),
+                                  Text(p.timeSlot!.durationText())
+                                ]
+                              )
+                            ],
+                          ),
+                        ),
+                      ).toList()
+                    ])
+                  );
+                }
                 
-                // child: SelectableHtml(
-                //   style: {
-                //     "div": Style(fontSize: const FontSize(16))
-                //   },
-                //   data: _session.description ?? '',
-                //   onLinkTap: (url, context, attributes, element) => launchUrl(Uri.parse(url ?? "")),
-                // ),
-              )
+                return const SizedBox.shrink();
+              },
             )
           ],
         )
@@ -175,45 +187,33 @@ class SessionDetailsWidgetState extends State {
     );
   }
 
-  Widget _timeWidget()
-  {
-    return Row(children: [
-      Expanded(
-        child: Column( children: [
+  Widget _timeWidget() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+      Column(
+        children: [
           Text("Start Time", style: Theme.of(context).textTheme.titleLarge),
-          Text("${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.uTC!.subtract(const Duration(hours: 7)))} ${_session.timeSlot!.startTime!.simpleTime()}", style: Theme.of(context).textTheme.bodyMedium)
-        ],)
+          Text(
+              "${DateFormat(DateFormat.ABBR_MONTH_DAY).format(_session.timeSlot!.startTime!.uTC!.subtract(const Duration(hours: 7)))} ${_session.timeSlot!.startTime!.simpleTime()}",
+              style: Theme.of(context).textTheme.bodyMedium)
+        ],
       ),
-      Expanded(
-        child: Column( children: [
+      Column(
+        children: [
           Text("End Time", style: Theme.of(context).textTheme.titleLarge),
-          Text(_session.timeSlot!.endTime!.simpleTime(), style: Theme.of(context).textTheme.bodyMedium)
-        ],),
-      )        
+          Text(_session.timeSlot!.endTime!.simpleTime(),
+              style: Theme.of(context).textTheme.bodyMedium)
+        ],
+      )
     ]);
   }
 
   Widget _locationWidget() {
-    return Row(children: [
-      Expanded(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column( children: [
+    return Column( children: [
               Text("Location", style: Theme.of(context).textTheme.titleLarge),
               Text(_session.Location ?? "", style: Theme.of(context).textTheme.bodyMedium)
-            ],)
-          ],
-        )
-      ),
-      // Expanded(
-      //   child: Column( children: [
-      //     Text("Format", style: Theme.of(context).textTheme.titleLarge),
-      //     Text(_session.format(), style: Theme.of(context).textTheme.bodyMedium)
-      //   ],)
-      // )
-    ]);
+            ],);
   }
 
   Widget keywordWidget() => listPropWidget("Keywords", _session.keywords());
@@ -225,15 +225,11 @@ class SessionDetailsWidgetState extends State {
       return const SizedBox.shrink();
     }
 
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
           children: [
           Text(title, style: Theme.of(context).textTheme.titleLarge,),
           Text(values.map((e) => e.name).join(" - "), style: Theme.of(context).textTheme.bodyMedium)
-          ]),
-      );
+          ]);
   }
 
 }
