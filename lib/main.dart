@@ -64,36 +64,37 @@ class _MyHomePageState extends State<MyHomePage> {
   late Future<List<Session>> Items;
 
   Future<void> _pullRefresh() async {
-      setState(() {});
+    Items = readWeb();
+      setState(() => {});
   }
 
+  Future<List<Session>> readWeb() async {
+    final timeZone = tzs.getLocation('America/Los_Angeles');
+
+    var currentTime = tzs.TZDateTime.now(timeZone);
+    var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 13), timeZone);
+    if(eventStartTime.isAfter(currentTime)) {
+      currentTime = eventStartTime;
+    }
+    
+    time = currentTime;
+
+    var uri = Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${time!.day.toString().padLeft(2, '0')}.txt');
+    final http.Response response = await http.get(uri);
+    // final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-08.txt'));
+    if(response.statusCode >= 200 && response.statusCode < 300) {
+      final String body = response.body;
+      var doc = parse.parse(response.body);
+      var items = doc.querySelectorAll("body > table > tbody > .agenda-item");
+      var web = List<Session>.from(items.map((e) => Session.fromHtml(e)));
+      return web;
+    }
+
+    return [];
+  }   
+
   @override
-  void initState() {
-    Future<List<Session>> readWeb() async {
-      final timeZone = tzs.getLocation('America/Los_Angeles');
-
-      var currentTime = tzs.TZDateTime.now(timeZone);
-      var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 13), timeZone);
-      if(eventStartTime.isAfter(currentTime)) {
-        currentTime = eventStartTime;
-      }
-      
-      time = currentTime;
-
-      var uri = Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-${time!.day.toString().padLeft(2, '0')}.txt');
-      final http.Response response = await http.get(uri);
-      // final http.Response response = await http.get(Uri.parse('https://s2023.siggraph.org/wp-content/linklings_snippets/wp_program_view_all_2023-08-08.txt'));
-      if(response.statusCode >= 200 && response.statusCode < 300) {
-        final String body = response.body;
-        var doc = parse.parse(response.body);
-        var items = doc.querySelectorAll("body > table > tbody > .agenda-item");
-        var web = List<Session>.from(items.map((e) => Session.fromHtml(e)));
-        return web;
-      }
-
-      return [];
-    }  
-
+  void initState() { 
     Items = readWeb();
   }
 
@@ -104,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text("Featured Sessions"),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.refresh))
+          IconButton(onPressed: _pullRefresh, icon: const Icon(Icons.refresh))
         ],
       ),
       drawer: Drawer(
