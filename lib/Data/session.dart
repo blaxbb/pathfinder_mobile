@@ -87,6 +87,26 @@ class Session {
 
   }
 
+  Iterable<String> registrationLevelsReadable() sync* {
+    var levels = registrationLevels();
+
+    if(levels.any((element) => element.name == "FC")) {
+      yield "Full Conference";
+    }
+
+    if(levels.any((element) => element.name == "E")) {
+      yield "Experience";
+    }
+
+    if(levels.any((element) => element.name == "EO")) {
+      yield "Exhibits Only";
+    }
+
+    if(levels.any((element) => element.name == "VC")) {
+      yield "Virtual Access";
+    }
+  }
+
   static String clean(String s) {
     var ret = parser.parseFragment(s).text ?? '';
     ret = utf8.decode(ret.codeUnits);

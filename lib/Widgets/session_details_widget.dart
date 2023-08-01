@@ -65,7 +65,7 @@ class SessionDetailsWidgetState extends State {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,                      
                       children: [
                         _locationWidget(),
-                        registrationLevelsWidget()
+                        _eventTypeWidget()
                       ],
                     ),
                 ]
@@ -216,20 +216,33 @@ class SessionDetailsWidgetState extends State {
             ],);
   }
 
-  Widget keywordWidget() => listPropWidget("Keywords", _session.keywords());
-  Widget interestAreasWidget() => listPropWidget("Interest Areas", _session.interestAreas());
-  Widget registrationLevelsWidget() => listPropWidget("Registration Level", _session.registrationLevels());
+  Widget _eventTypeWidget() {
+    return Column( children: [
+              Text("Event Type", style: Theme.of(context).textTheme.titleLarge),
+              Text(_session.EventType ?? "", style: Theme.of(context).textTheme.bodyMedium)
+            ],);
+  }  
 
-  Widget listPropWidget(String title, List<Tag> values) {
+  Widget keywordWidget() => listTagWidget("Keywords", _session.keywords());
+  Widget interestAreasWidget() => listTagWidget("Interest Areas", _session.interestAreas());
+  Widget registrationLevelsWidget() => listPropWidget("Registration Level", _session.registrationLevelsReadable());
+
+  Widget listTagWidget(String title, List<Tag> values) {
+    return listPropWidget(title, values.map((e) => e.name ?? ''));
+  }
+
+  Widget listPropWidget(String title, Iterable<String> values) {
     if(values.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Column(
-          children: [
-          Text(title, style: Theme.of(context).textTheme.titleLarge,),
-          Text(values.map((e) => e.name).join(" - "), style: Theme.of(context).textTheme.bodyMedium)
-          ]);
-  }
+    return Center(
+      child: Column(
+            children: [
+            Text(title, style: Theme.of(context).textTheme.titleLarge,),
+            Text(values.join(" - "), style: Theme.of(context).textTheme.bodyMedium)
+            ]),
+    );
+  }  
 
 }

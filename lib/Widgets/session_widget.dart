@@ -63,6 +63,7 @@ class _SessionWidgetState extends State<SessionWidget> {
                       _session.Location == null
                           ? const SizedBox.shrink()
                           : Text(_session.Location!),
+                      Text(_session.registrationLevelsReadable().join(" - ")),
                       Row(
                         children: [
                           _session.timeSlot?.endTime?.eventTime == null || _session.timeSlot?.startTime?.eventTime == null
