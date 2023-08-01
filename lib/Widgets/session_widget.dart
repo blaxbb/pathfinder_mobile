@@ -1,4 +1,5 @@
 import 'package:intl/intl.dart';
+import 'package:pathfinder_mobile/Widgets/map_navigate_widget.dart';
 import 'package:pathfinder_mobile/Widgets/session_details_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -78,6 +79,23 @@ class _SessionWidgetState extends State<SessionWidget> {
               )
             )
           ),
+          _session.Location == null ?
+            const SizedBox.shrink() :
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => navigateTo(),
+              child: Container(
+                padding: const EdgeInsets.only(right: 8),
+                child: Icon(
+                  Icons.map,
+                  color: Theme.of(context).textTheme.bodyMedium!.color,
+                  shadows: [
+                    Shadow(color: tapped ? Colors.black : Colors.transparent, offset: const Offset(0,0), blurRadius: 2
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ])
     );
   }
@@ -107,5 +125,11 @@ class _SessionWidgetState extends State<SessionWidget> {
       else {
         prefs.remove("favorite_$id");
       }
+  }
+
+  Future<void> navigateTo() async {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.Location!))
+    );
   }
 }
