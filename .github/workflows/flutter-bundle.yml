@@ -50,6 +50,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.deploy }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./bundle.zip
+          asset_path: ./build/flutter_assets/bundle.zip
           asset_name: bundle.zip
           asset_content_type: application/zip
