@@ -1,4 +1,4 @@
-name: CI
+name: Bundle
 
 # Controls when the workflow will run
 on:
@@ -39,8 +39,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.deploy }} 
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.generate_release_tag.outputs.next_release_tag }}
+          release_name: Release ${{ steps.generate_release_tag.outputs.next_release_tag }}
           draft: false
           prerelease: false
      -  name: Upload Release Asset
