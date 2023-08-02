@@ -176,8 +176,8 @@ class MapNavigatePainter extends CustomPainter {
       var start = path!.first;
       var end = path!.last;
 
-      canvas.drawCircle(scale(start.location, size), 12, Paint() ..color=Colors.blue ..strokeWidth=5 ..style=PaintingStyle.stroke);
-      canvas.drawCircle(scale(end.location, size), 12, Paint() ..color=Colors.red ..strokeWidth=5 ..style=PaintingStyle.stroke);
+      canvas.drawCircle(scale(start.location, size), 6, Paint() ..color=Colors.blue ..strokeWidth=5 ..style=PaintingStyle.stroke);
+      canvas.drawCircle(scale(end.location, size), 6, Paint() ..color=Colors.red ..strokeWidth=5 ..style=PaintingStyle.stroke);
     }
   }
 
