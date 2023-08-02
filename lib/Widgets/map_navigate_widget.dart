@@ -112,13 +112,14 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                     Text("Navigate From: "),
                     Expanded(
                       child: DropdownButton<String>(
-                        value: location,
-                        items: allLocations.map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
-                        onChanged: ((value) {setState(() {
-                          location = value;
-                          nodes.notifyListeners();
-                        });})
-                      ),
+                          value: location,
+                          isExpanded: true,
+                          items: allLocations.map((e) => DropdownMenuItem(child: Text(e), value: e,)).toList(),
+                          onChanged: ((value) {setState(() {
+                            location = value;
+                            nodes.notifyListeners();
+                          });})
+                        ),
                     ),
                   ],
                 ),
@@ -132,7 +133,7 @@ class MapNavigateWidgetState extends State<MapNavigateWidget>
                     maxScale: 4,
                     child: Center(
                       child: Container(
-                        constraints: BoxConstraints(maxHeight: (MediaQuery.of(context).size.height * .6)),
+                        constraints: BoxConstraints(maxWidth: (MediaQuery.of(context).size.width * .95)),
                         child: CustomPaint(
                             foregroundPainter: MapNavigatePainter(path, _animation),
                             child: Image.asset("assets/maps/${path.first.map}.jpg", fit: BoxFit.fill),
