@@ -27,6 +27,13 @@ jobs:
        with:
           name: flutter-bundle
           path: bundle.zip
+     - name: Generate release tag
+       id: generate_release_tag
+       uses: amitsingh-007/next-release-tag@v4.0.0
+       with:
+          github_token: ${{ secrets.deploy }}
+          tag_prefix: 'v'
+          tag_template: 'yyyy.mm.dd.i'          
      -  id: create_release
         uses: actions/create-release@v1
         env:
