@@ -119,13 +119,15 @@ class SessionDetailsWidgetState extends State {
                           child: Row(
                             children: [
                               Padding(padding: const EdgeInsets.all(8), child: Text(p.timeSlot!.startTime!.simpleTime(), style: Theme.of(context).textTheme.titleLarge,)),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(p.Title ?? '', style: Theme.of(context).textTheme.bodyLarge),
-                                  p.speakers.isNotEmpty ? Text("Presenting: ${p.speakers.join(", ")}") : SizedBox.shrink(),
-                                  Text(p.timeSlot!.durationText())
-                                ]
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(p.Title ?? '', style: Theme.of(context).textTheme.bodyLarge),
+                                    p.speakers.isNotEmpty ? Text("Presenting: ${p.speakers.join(", ")}") : SizedBox.shrink(),
+                                    Text(p.timeSlot!.durationText())
+                                  ]
+                                ),
                               )
                             ],
                           ),
