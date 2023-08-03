@@ -19,10 +19,13 @@ jobs:
          channel: 'stable'
      - run: |
         sudo apt-get update -y
-        sudo apt-get install -y zip ninja-build libgtk-3-dev
+        sudo apt-get install -y zip ninja-build libgtk-3-dev git
      - run: flutter config --enable-linux-desktop
+     - run: dart /usr/local/flutter/bin/cache/dart-sdk/bin/snapshots/frontend_server.dart.snapshot --sdk-root /usr/local/flutter/bin/cache/artifacts/engine/common/flutter_patched_sdk_product --target=flutter --aot --tfa -Ddart.vm.product=true --packages .packages --output-dill build/kernel_snapshot.dill --verbose --depfile build/kernel_snapshot.d package:pathfinder_mobile/main.dart
      - run: flutter build bundle --release
      - run: cd build/flutter_assets && zip -r bundle.zip .
+     - run: git clone --branch engine-binaries https://github.com/ardera/flutter-pi /tmp/engine-binaries
+     - run: /tmp/engine-binaries/gen_snapshot_linux_x64 --causal_async_stacks --deterministic --snapshot_kind=app-aot-elf --elf=build/flutter_assets/app.so --strip --sim_use_hardfp --no-use-integer-division build/kernel_snapshot.dill
      - uses: actions/upload-artifact@v3
        with:
           name: flutter-bundle
