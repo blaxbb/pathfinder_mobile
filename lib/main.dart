@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
     tz.initializeTimeZones();
     return MaterialApp(
       title: 'SIGGRAPH 2023',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: getMaterialColor(Color.fromARGB(255,240, 124, 70)),
         brightness: Brightness.light,
