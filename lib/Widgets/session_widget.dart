@@ -69,7 +69,7 @@ class _SessionWidgetState extends State<SessionWidget> {
                         children: [
                           _session.timeSlot?.endTime?.eventTime == null || _session.timeSlot?.startTime?.eventTime == null
                               ? const SizedBox.shrink()
-                              : Text(_session.timeSlot!.durationText()),                           
+                              : Flexible(child: Text(_session.timeSlot!.durationText())),                           
                         ],
                       )
                     ],

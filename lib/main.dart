@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final timeZone = tzs.getLocation('America/Los_Angeles');
 
     var currentTime = tzs.TZDateTime.now(timeZone);
-    var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 13), timeZone);
+    var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 15), timeZone);
     if(eventStartTime.isAfter(currentTime)) {
       currentTime = TZDateTime(timeZone,currentTime.year, currentTime.month, 6, currentTime.hour, currentTime.minute);
       // currentTime = eventStartTime;
@@ -198,8 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           else
           {
-            var upcoming = snapshot.data!.where((s) => s.timeSlot!.startTime!.eventTime!.millisecondsSinceEpoch > time!.millisecondsSinceEpoch)
-              .toList();
+            var upcoming = snapshot.data!.where((s) => s.timeSlot!.startTime!.eventTime!.difference(time!).inMinutes <= 120);
 
             bool wideScreen = MediaQuery.of(context).size.width > 800;
 
@@ -207,7 +206,6 @@ class _MyHomePageState extends State<MyHomePage> {
               onRefresh: _pullRefresh,
               child: ListView(
                 children: [
-                  SessionCategoryWidget(upcoming.take(8).toList(), title: "Upcoming (Updated: ${DateFormat("MMM dd - hh:mm a").format(time!)})",),
                   SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Keynote' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Keynotes",),
                   ...(wideScreen ? [Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,6 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Frontiers' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Frontiers",),
                     SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Production Session' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Production Sessions",),
                   ]),
+                  SessionCategoryWidget(upcoming.toList(), title: "Upcoming", subtitle: "${DateFormat("MMM dd - hh:mm a").format(time!)} + 2 hours",),
                   SessionCategoryWidget(FilterMultiplePosters(snapshot).where((element) => element.timeSlot!.duration().inHours > 4 && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "All-Day",),
                 ],
               ),
