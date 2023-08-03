@@ -81,6 +81,7 @@ class SessionDetailsWidgetState extends State {
                     keywordWidget(),
                     interestAreasWidget(),
                     registrationLevelsWidget(),
+                    recordingStatusWidget()
                   ]
                 ),
               )
@@ -228,6 +229,7 @@ class SessionDetailsWidgetState extends State {
   Widget keywordWidget() => listTagWidget("Keywords", _session.keywords());
   Widget interestAreasWidget() => listTagWidget("Interest Areas", _session.interestAreas());
   Widget registrationLevelsWidget() => listPropWidget("Registration Level", _session.registrationLevelsReadable());
+  Widget recordingStatusWidget() => listTagWidget("Recording Status", _session.recordingStatus());
 
   Widget listTagWidget(String title, List<Tag> values) {
     return listPropWidget(title, values.map((e) => e.name ?? ''));
