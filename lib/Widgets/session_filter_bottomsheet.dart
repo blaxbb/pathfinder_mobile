@@ -36,26 +36,30 @@ class SessionFilterBottomsheetState extends State {
 
     return ListView(
       children: [
-        TextField(
-          controller: controller,
-          onChanged: (value) { filter.search = value; },
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            hintText: "Search",
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                setState(() {
-                  controller.clear();
-                  filter.search = "";
-                });
-              },
-            )
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: controller,
+            onChanged: (value) { filter.search = value; },
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              hintText: "Search",
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  setState(() {
+                    controller.clear();
+                    filter.search = "";
+                  });
+                },
+              )
+            ),
           ),
         ),
         ...filterGroup("Registration Level", regs.cast<String>(), filter.registrationFilters),
         ...filterGroup("Keywords", keywords.cast<String>(), filter.keywordFilters),
-        ...filterGroup("Interest Areas", areas.cast<String>(), filter.areaFilters)
+        ...filterGroup("Interest Areas", areas.cast<String>(), filter.areaFilters),
+        SizedBox.fromSize(size: const Size(0, 16),)
       ],
     );
   }
@@ -66,27 +70,30 @@ class SessionFilterBottomsheetState extends State {
         padding: const EdgeInsets.all(8.0),
         child: Text(title, style: const TextStyle(fontSize: 18),),
       ),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: filters.map(
-          (e) => FilterChip(
-            key: UniqueKey(),
-            label: Text(e),
-            selected: active.contains(e),
-            selectedColor: Colors.blue[100],
-            onSelected: (value) {
-              setState(() {
-                if(value) {
-                  active.add(e);
-                }
-                else {
-                  active.remove(e);
-                }
-              });
-            }
-          )
-        ).toList()
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: filters.map(
+            (e) => FilterChip(
+              key: UniqueKey(),
+              label: Text(e),
+              selected: active.contains(e),
+              selectedColor: Colors.blue[100],
+              onSelected: (value) {
+                setState(() {
+                  if(value) {
+                    active.add(e);
+                  }
+                  else {
+                    active.remove(e);
+                  }
+                });
+              }
+            )
+          ).toList()
+        ),
       )
     ];
   }
