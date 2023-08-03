@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -9,6 +10,7 @@ import 'package:pathfinder_mobile/Widgets/session_category_widget.dart';
 import 'package:pathfinder_mobile/Widgets/session_index_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:timezone/standalone.dart';
 
 import 'Data/session.dart';
 import 'Widgets/map_navigate_widget.dart';
@@ -95,7 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
     var currentTime = tzs.TZDateTime.now(timeZone);
     var eventStartTime = tzs.TZDateTime.from(DateTime.utc(2023, 08, 06, 13), timeZone);
     if(eventStartTime.isAfter(currentTime)) {
-      currentTime = eventStartTime;
+      currentTime = TZDateTime(timeZone,currentTime.year, currentTime.month, 6, currentTime.hour, currentTime.minute);
+      // currentTime = eventStartTime;
     }
     
     time = currentTime;
@@ -117,6 +120,12 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() { 
     Items = readWeb();
+    Timer.periodic(const Duration(minutes: 15), (timer) {
+      Items = readWeb();
+      setState(() {
+        
+      });
+    });
   }
 
   @override
