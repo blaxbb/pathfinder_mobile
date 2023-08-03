@@ -199,7 +199,10 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           else
           {
-            var upcoming = snapshot.data!.where((s) => s.timeSlot!.startTime!.eventTime!.difference(time!).inMinutes <= 120);
+            var upcoming = snapshot.data!.where((s) {
+              var diff = s.timeSlot!.startTime!.eventTime!.difference(time!).inMinutes;
+              return diff <= 120 && diff > -30;
+            });
 
             bool wideScreen = MediaQuery.of(context).size.width > 800;
 
