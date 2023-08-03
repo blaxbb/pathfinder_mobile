@@ -177,14 +177,14 @@ class SessionDetailsWidgetState extends State {
     return Row(
       children: [
         Expanded(child: Text(_session.title!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24))),
-        IconButton(
+        _session.Location != null ? IconButton(
           onPressed: (){
             Navigator.push(context,
                 MaterialPageRoute(builder: (context) => MapNavigateWidget(_session.Location!))
             );
           },
-          icon: Icon(Icons.map)
-        )        
+          icon: const Icon(Icons.map)
+        ) : SizedBox.shrink()
       ],
     );
   }
