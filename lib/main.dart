@@ -84,6 +84,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  bool DISPLAY_EDITORS = false;
+
+
   DateTime? time;
   late Future<List<Session>> Items;
 
@@ -167,22 +170,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 
               });}),
             ),
-            ListTile(
+            DISPLAY_EDITORS ? ListTile(
               title: const Text("Map"),
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => MapNavigateWidget("Pathfinders")))
               .then((value) {Navigator.pop(context); setState(() {
                 
               });}),
-            ),            
-            ListTile(
+            ) : const SizedBox.shrink(),
+            DISPLAY_EDITORS ? ListTile(
               title: const Text("Map Edit"),
               onTap: () => Navigator
               .push(context, MaterialPageRoute(builder: (context) => MapEditWidget()))
               .then((value) {Navigator.pop(context); setState(() {
                 
               });}),
-            ),
+            ) : const SizedBox.shrink(),
           ],
         ),
       ),
