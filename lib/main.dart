@@ -209,6 +209,7 @@ class _MyHomePageState extends State<MyHomePage> {
             return RefreshIndicator(
               onRefresh: _pullRefresh,
               child: ListView(
+                key: const PageStorageKey("main"),
                 children: [
                   SessionCategoryWidget(snapshot.data!.where((element) => element.EventType == 'Keynote' && element.timeSlot!.startTime!.eventTime!.day == time!.day).toList(), title: "Keynotes",),
                   ...(wideScreen ? [Row(
