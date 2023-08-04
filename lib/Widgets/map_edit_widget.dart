@@ -24,6 +24,7 @@ class MapEditWidgetState extends State<MapEditWidget> {
 
   String mapName = "map_level_1_2023";
   String? prevMap = null;
+  Map<String, bool> keysDown = {};
 
   Future<MapEditPainter?> loadMap(String map) async {
     var mapImage = Image.asset("assets/maps/$map.jpg");
@@ -42,6 +43,30 @@ class MapEditWidgetState extends State<MapEditWidget> {
     painter!.selectedNode = selectedNode;
 
     return painter;
+  }
+
+  bool _onKey(KeyEvent event) {
+  final key = event.logicalKey.keyLabel;
+
+  if (event is KeyDownEvent) {
+    keysDown[key] = true;
+    print("Key down: $key");
+  } else if (event is KeyUpEvent) {
+    keysDown[key] = false;
+    print("Key up: $key");
+  } else if (event is KeyRepeatEvent) {
+    print("Key repeat: $key");
+  }
+
+  return false;
+}
+
+  @override
+  void initState() {
+    
+    ServicesBinding.instance.keyboard.addHandler(_onKey);
+
+    super.initState();
   }
 
   Widget build(BuildContext context) {
@@ -101,8 +126,24 @@ class MapEditWidgetState extends State<MapEditWidget> {
                   var copy = painter!.nodes.toList();
                   copy.sort((a, b) => (scaled - a.location).distanceSquared.compareTo((scaled - b.location).distanceSquared));
                   var nearest = copy.isEmpty ? null : copy.first;
+                  print(keysDown);
 
-                  switch (event.buttons) {
+                  int? keyDownEvent = null;
+                  var keyMapping = 
+                  {
+                    "D": 2,
+                    "S": 4,
+                    "A": 16,
+                    "F": 8
+                  };
+                  for(var key in keysDown.keys){
+                    if(keysDown[key]! && keyMapping.containsKey(key)){
+                      keyDownEvent = keyMapping[key];
+                      break;
+                    }
+                  }
+
+                  switch (keyDownEvent ?? event.buttons) {
                     case 1:
                       _addNode(scaled);
                       break;
