@@ -61,18 +61,12 @@ class _SessionWidgetState extends State<SessionWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(_session.title ?? "", style: const TextStyle(fontSize: 18),),
-                      Row(children: [
-                        _session.EventType == null ?
-                          const SizedBox.shrink() :
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                            child: Text(_session.EventType!),
-                          ),
-                        _session.Location == null
-                          ? const SizedBox.shrink()
-                          : Text(_session.Location!),
-                      ],),
-                      
+                      _session.EventType != null ?
+                        Text(_session.EventType!) :
+                        const SizedBox.shrink(),
+                      _session.Location != null ?
+                        Text(_session.Location!) :
+                        const SizedBox.shrink(),                      
                       Text(_session.registrationLevels().map((e) => e.name).join(" - ")),
                       Row(
                         children: [
