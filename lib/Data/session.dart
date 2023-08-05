@@ -20,7 +20,34 @@ class Session {
   String? Location;
   String? Url;
 
-  List<Tag> registrationLevels() => Tags?["registration-category"] ?? [];
+  List<Tag> registrationLevels() {
+    const key = "registration-category";
+    if(Tags != null && Tags!.containsKey(key))
+    {
+      List<Tag> ret = [];
+      var vals = Tags![key]!;
+
+      Map<String, String> categories = {
+        "FC": "Full Conference",
+        "E": "Experience",
+        "EO": "Exhibits Only",
+        "V": "Virtual"
+      };
+
+      for(var cat in categories.keys)
+      {
+        if(vals.any((element) => element.name == cat))
+        {
+          ret.add(Tag(id: cat, name: categories[cat]));
+        }
+      }
+
+      return ret;
+    }
+
+    return [];
+  }
+
   List<Tag> keywords() => Tags?["keyword"] ?? [];
   List<Tag> interestAreas() => Tags?["interest-area"] ?? [];
   List<Tag> recordingStatus() => Tags?["recording"] ?? [];
@@ -85,26 +112,6 @@ class Session {
       EventType = element.querySelector('.presentation-type span')?.innerHtml;
     }
 
-  }
-
-  Iterable<String> registrationLevelsReadable() sync* {
-    var levels = registrationLevels();
-
-    if(levels.any((element) => element.name == "FC")) {
-      yield "Full Conference";
-    }
-
-    if(levels.any((element) => element.name == "E")) {
-      yield "Experience";
-    }
-
-    if(levels.any((element) => element.name == "EO")) {
-      yield "Exhibits Only";
-    }
-
-    if(levels.any((element) => element.name == "VC")) {
-      yield "Virtual Access";
-    }
   }
 
   static String clean(String s) {

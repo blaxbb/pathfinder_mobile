@@ -228,7 +228,7 @@ class SessionDetailsWidgetState extends State {
 
   Widget keywordWidget() => listTagWidget("Keywords", _session.keywords());
   Widget interestAreasWidget() => listTagWidget("Interest Areas", _session.interestAreas());
-  Widget registrationLevelsWidget() => listPropWidget("Registration Level", _session.registrationLevelsReadable());
+  Widget registrationLevelsWidget() => listTagWidget("Registration Level", _session.registrationLevels());
   Widget recordingStatusWidget() => listTagWidget("Recording Status", _session.recordingStatus());
 
   Widget listTagWidget(String title, List<Tag> values) {
