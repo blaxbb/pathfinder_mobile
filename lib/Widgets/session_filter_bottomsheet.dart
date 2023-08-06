@@ -36,26 +36,26 @@ class SessionFilterBottomsheetState extends State {
 
     return ListView(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            controller: controller,
-            onChanged: (value) { filter.search = value; },
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: "Search",
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  setState(() {
-                    controller.clear();
-                    filter.search = "";
-                  });
-                },
-              )
-            ),
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.all(8.0),
+        //   child: TextField(
+        //     controller: controller,
+        //     onChanged: (value) { filter.search = value; },
+        //     decoration: InputDecoration(
+        //       border: const OutlineInputBorder(),
+        //       hintText: "Search",
+        //       suffixIcon: IconButton(
+        //         icon: const Icon(Icons.clear),
+        //         onPressed: () {
+        //           setState(() {
+        //             controller.clear();
+        //             filter.search = "";
+        //           });
+        //         },
+        //       )
+        //     ),
+        //   ),
+        // ),
         ...filterGroup("Registration Level", regs.cast<String>(), filter.registrationFilters),
         ...filterGroup("Keywords", keywords.cast<String>(), filter.keywordFilters),
         ...filterGroup("Interest Areas", areas.cast<String>(), filter.areaFilters),
