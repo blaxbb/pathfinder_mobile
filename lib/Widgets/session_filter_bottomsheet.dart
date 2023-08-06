@@ -31,6 +31,7 @@ class SessionFilterBottomsheetState extends State {
     var regs = all.expand((s) => s.registrationLevels().where((e) => e != null).toSet().map((e) => e.name)).toSet();
     var keywords = all.expand((s) => s.keywords().where((e) => e != null).toSet().map((e) => e.name)).toSet();
     var areas = all.expand((s) => s.interestAreas().where((e) => e != null).toSet().map((e) => e.name)).toSet();
+    var recordingStates = all.expand((s) => s.recordingStatus().where((e) => e != null).toSet().map((e) => e.name)).toSet();
 
     controller.text = filter.search ?? "";
 
@@ -59,6 +60,7 @@ class SessionFilterBottomsheetState extends State {
         ...filterGroup("Registration Level", regs.cast<String>(), filter.registrationFilters),
         ...filterGroup("Keywords", keywords.cast<String>(), filter.keywordFilters),
         ...filterGroup("Interest Areas", areas.cast<String>(), filter.areaFilters),
+        ...filterGroup("Recording Status", recordingStates.cast<String>(), filter.recordingFilters),
         SizedBox.fromSize(size: const Size(0, 16),)
       ],
     );
